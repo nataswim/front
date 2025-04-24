@@ -1,0 +1,94 @@
+/* Custom background color for primary elements */
+.bg-primary {
+    --bs-bg-opacity: 1;
+    background-color: #5bcacb !important; /* Light teal */
+}
+
+/* Customizations for Bootstrap components */
+
+/* Primary button with custom color */
+.btn-primary {
+    background-color: #21cfc6 !important; /* Bright teal */
+    border-color: #21cfc6 !important;
+}
+
+/* Secondary button with custom color */
+.btn-secondary {
+    background-color: #42a4a8 !important; /* Light teal */
+    border-color: #42a4a8 !important;
+}
+
+/* Active state for nav pills */
+.nav-pills .nav-link.active {
+    background-color: #0175c5 !important; /* Dark blue */
+}
+
+/* Custom styles for HomePage */
+
+/* Hover lift effect */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.075); /* Subtle shadow */
+}
+
+/* Animated background for hero section */
+@keyframes wave-animation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+.hero-gradient {
+    background: linear-gradient(45deg, #0175c5, #21cfc6, #42a4a8); /* Gradient colors */
+    background-size: 200% 200%;
+    animation: wave-animation 10s ease infinite; /* Animation */
+}
+
+/* Subtle floating effect for icons */
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.feature-icon {
+    animation: float 4s ease-in-out infinite; /* Floating effect */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .hero-section {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .lead {
+        font-size: 1rem; /* Adjust font size */
+    }
+}
+.bg-dark {
+    --bs-bg-opacity: 1;
+    background-color: #484757;
+}
+
+.bg-primary-subtle {
+    background-color: #5bcacb !important;
+    color: #fff;
+}

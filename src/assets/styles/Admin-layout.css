@@ -1,0 +1,100 @@
+/* Styles pour le layout utilisateur */
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-main {
+  flex: 1;
+  background-color: #f5f4f0!important;
+  padding: 1rem;
+}
+
+
+
+/* Ajustements pour le header */
+
+.admin-header {
+  background-color: #24b2a3;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.admin-logo-wrapper {
+  background-color: #FFF;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+.admin-site-title {
+  color: #004f59;
+}
+
+.admin-menu-item {
+  background-color: #ecf0f3;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.admin-profile-btn {
+  background-color: #21cfc6;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.admin-logout-btn {
+  background-color: #b12929;
+  margin: 0 1px;
+  color: #FFF;
+  border-radius: 10%;
+  border: #FFF;
+  padding: 10px 15px; 
+}
+
+/* Ajustements pour la navbar */
+.admin-nav {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+/* Ajustements pour le footer */
+.admin-footer {
+  background-color: #0f6770;
+  color: #fff;
+  padding: 1rem 0;
+  margin-top: auto;
+  border-left: 20px solid #f9f5f2;
+  border-right: 20px solid #f9f5f2;
+  border-bottom: 40px solid #21cfc6;
+  border-top: 40px solid #21cfc6;
+}
+
+.admin-nav-link {
+  background-color: #f8f8f8;
+    color: #000;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+    font-size: 130%;
+    margin: 10px;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link:focus {
+  background-color: #fff3cd; 
+color: #000;  
+outline: 0px solid #cff4fc;
+  border: none;
+}
+
+.admin-nav-link:active{
+    background-color: #e0e0e0;/*Un gris encore plus foncé quand le button est cliqué*/
+    border: none;
+}

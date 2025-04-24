@@ -1,0 +1,345 @@
+/* Light Theme (default) */
+[data-theme='light'] {
+  --primary-color: #21cfc6;
+  --primary-color-hover: #1ebab1;
+  --secondary-color: #42a4a8;
+  --secondary-color-hover: #3a9399;
+  
+  --text-primary: #484757;
+  --text-secondary: #6a6a7c;
+  --text-heading: #2c2c36;
+  
+  --bg-primary: #ecf0f3;
+  --bg-secondary: #f5f7f9;
+  
+  color-scheme: light;
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+  --primary-color: #21cfc6;
+  --primary-color-hover: #1ebab1;
+  --secondary-color: #0175c5;
+  --secondary-color-hover: #0165a8;
+  
+  --text-primary: #ecf0f3;
+  --text-secondary: #d1d9e6;
+  --text-heading: #ffffff;
+  
+  --bg-primary: #484757;
+  --bg-secondary: #5a5a6e;
+  
+  color-scheme: dark;
+}
+
+/* High Contrast Theme */
+[data-theme='high-contrast'] {
+  --primary-color: #ffffff;
+  --primary-color-hover: #f0f0f0;
+  --secondary-color: #21cfc6;
+  --secondary-color-hover: #1ebab1;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-heading: #ffffff;
+  
+  --bg-primary: #000000;
+  --bg-secondary: #121212;
+  
+  color-scheme: dark;
+}
+
+/* Theme Transition */
+body {
+  transition: 
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Theme Toggle Styles */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.theme-toggle-icon {
+  width: 24px;
+  height: 24px;
+  fill: var(--text-primary);
+}
+
+/* Accessibility Enhancements for Themes */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  body * {
+    transition: none !important;
+  }
+}
+.header {
+  background-color: #f9f5f2;
+}
+.nav-home {
+  background-color: #FFFFFF;
+}
+
+/* styles/PageInfosList.css */
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Animation pour les badges de catégorie */
+.badge {
+  transition: transform 0.2s ease;
+}
+
+.hover-card:hover .badge {
+  transform: scale(1.05);
+}
+
+/* Style pour l'image non disponible */
+.image-placeholder {
+  background: linear-gradient(135deg, #f8f9fa 25%, #e9ecef 25%, #e9ecef 50%, #f8f9fa 50%, #f8f9fa 75%, #e9ecef 75%, #e9ecef 100%);
+  background-size: 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style pour la section de recherche */
+.search-container {
+  position: relative;
+}
+
+.search-container .clear-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.search-container .clear-button:hover {
+  color: #343a40;
+}
+
+/* Pagination style */
+.pagination .page-link {
+  color: #007bff;
+  border-radius: 0;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+/* Style pour la carte d'article avec image */
+.card-img-overlay-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+}
+
+.card-img-overlay-bottom h5 {
+  color: white;
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-filters {
+    flex-wrap: wrap;
+  }
+  
+  .category-filters button {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* src/assets/styles/header.css */
+
+/* Styles généraux du header */
+.navbar {
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+/* Animation du logo */
+.navbar-brand img {
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+  transform: scale(1.05);
+}
+
+/* Styles des liens de navigation */
+.nav-link {
+  position: relative;
+  padding: 0.75rem 1rem !important;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--bs-primary) !important;
+}
+
+/* Effet de soulignement animé */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: var(--bs-primary);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+  width: 70%;
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  min-width: 12rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.dropdown-item {
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover, .dropdown-item.active {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.dropdown-item svg {
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Effet de shadow lors du scroll */
+.sticky-top {
+  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Style des boutons dans le header */
+.header .btn {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.header .btn-outline-primary:hover {
+  transform: translateY(-2px);
+}
+
+.header .btn-primary {
+  box-shadow: 0 2px 5px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.header .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(var(--bs-primary-rgb), 0.4);
+}
+
+/* Styles responsives */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding: 1rem 0;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  .nav-link::after {
+    display: none;
+  }
+  
+  .dropdown-menu {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-left: 1rem;
+  }
+  
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+  }
+  
+  .navbar-nav {
+    margin: 1rem 0;
+  }
+  
+  .nav-link.dropdown-toggle.show::after {
+    transform: rotate(180deg);
+  }
+}
+
+/* Bouton menu burger */
+.navbar-toggler {
+  padding: 0.6rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+/* Recherche */
+.input-group {
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.input-group .form-control {
+  border-right: none;
+}
+
+.input-group .btn {
+  border-left: none;
+}

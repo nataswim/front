@@ -1,0 +1,211 @@
+├── public
+│   ├── assets
+│   │   └── images
+│   │       ├── .DS_Store
+│   │       ├── banner
+│   │       │   ├── nataswim_app_banner_0.jpg
+│   │       ├── logo
+│   │       │   ├── nataswim_app_logo_0.png
+│   │       ├── mycreanet_icone_1.png
+│   │       └── personnas
+│   │           ├── EL_HAOUAT_MED_HASSAN_0.gif
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── manifest.json
+│   └── robots.txt
+├── README.md
+└── src
+    ├── .DS_Store
+    ├── App.css
+    ├── App.jsx
+    ├── App.test.js
+    ├── assets
+    │   └── styles
+    │       ├── Admin-layout.css
+    │       ├── custom-bootstrap.css
+    │       ├── global.css
+    │       ├── themes.css
+    │       ├── user-layout.css
+    │       ├── variables.css
+    │       └── visitor-layout.css
+    ├── components
+    │   ├── .DS_Store
+    │   ├── admin
+    │   │   ├── AdminFooter.jsx
+    │   │   └── AdminHeader.jsx
+    │   ├── ErrorBoundary.jsx
+    │   ├── ErrorComponent.jsx
+    │   ├── LoadingComponent.jsx
+    │   ├── template
+    │   │   ├── Footer.jsx
+    │   │   ├── Header.jsx
+    │   │   └── RandomBanner.jsx
+    │   ├── ui
+    │   │   ├── Alert.jsx
+    │   │   ├── AuthTestComponent.jsx
+    │   │   ├── Button.jsx
+    │   │   ├── Card.jsx
+    │   │   ├── DataDiagnosticComponent.jsx
+    │   │   ├── forms
+    │   │   │   ├── Checkbox.jsx
+    │   │   │   ├── FileUpload.jsx
+    │   │   │   ├── FormContainer.jsx
+    │   │   │   ├── FormField.jsx
+    │   │   │   ├── Input.jsx
+    │   │   │   ├── Select.jsx
+    │   │   │   └── TextEditor.jsx
+    │   │   ├── Loader.jsx
+    │   │   ├── Modal.jsx
+    │   │   ├── Notification.jsx
+    │   │   └── Table.jsx
+    │   └── user
+    │       ├── UserFooter.jsx
+    │       └── UserHeader.jsx
+    ├── context
+    │   ├── AuthContext.jsx
+    │   ├── PlanContext.jsx
+    │   ├── UIContext.jsx
+    │   └── WorkoutContext.jsx
+    ├── hooks
+    │   ├── useAuth.js
+    │   ├── useFetch.js
+    │   ├── useFetch.txt
+    │   ├── useForm.js
+    │   ├── useForm.txt
+    │   ├── useLocalStorage.js
+    │   ├── useLocalStorage.txt
+    │   ├── useModal.js
+    │   └── useModal.txt
+    ├── index.css
+    ├── index.js
+    ├── layouts
+    │   ├── AdminLayout.jsx
+    │   ├── AuthLayout.jsx
+    │   ├── UserLayout.jsx
+    │   └── VisitorLayout.jsx
+    ├── logo.svg
+    ├── pages
+    │   ├── .DS_Store
+    │   ├── admin
+    │   │   ├── .DS_Store
+    │   │   ├── DashboardPage.jsx
+    │   │   ├── exercises
+    │   │   │   ├── AdminExercisesPage.jsx
+    │   │   │   ├── ExerciseDetailPage.jsx
+    │   │   │   └── ExerciseFormPage.jsx
+    │   │   ├── pages
+    │   │   │   ├── ContentPagesPage.jsx
+    │   │   │   ├── PageDetailPage.jsx
+    │   │   │   └── PageFormPage.jsx
+    │   │   ├── plans
+    │   │   │   ├── AdminPlansPage.jsx
+    │   │   │   ├── PlanDetailPage.jsx
+    │   │   │   └── PlanFormPage.jsx
+    │   │   ├── swimsets
+    │   │   │   ├── AdminSwimSetsPage.jsx
+    │   │   │   ├── SwimSetsFormPage.jsx
+    │   │   │   └── SwimSetsPage.jsx
+    │   │   ├── uploads
+    │   │   │   ├── AdminUploadsPage.jsx
+    │   │   │   ├── UploadDetailPage.jsx
+    │   │   │   └── UploadFormPage.jsx
+    │   │   ├── users
+    │   │   │   ├── UserFormPage.jsx
+    │   │   │   └── UsersPage.jsx
+    │   │   └── workouts
+    │   │       ├── 0_AdminWorkoutsPage.jsx
+    │   │       ├── 0_WorkoutFormPage.jsx
+    │   │       ├── AdminWorkoutsPage.jsx
+    │   │       ├── WorkoutDetailPage.jsx
+    │   │       └── WorkoutFormPage.jsx
+    │   ├── auth
+    │   │   ├── ForgotPasswordPage.jsx
+    │   │   ├── LoginPage-video.jsx
+    │   │   ├── LoginPage.jsx
+    │   │   ├── RegisterPage_Exemple.jsx
+    │   │   ├── RegisterPage.jsx
+    │   │   └── ResetPasswordPage.jsx
+    │   ├── ErrorPages
+    │   │   ├── ErrorRoutes.jsx
+    │   │   ├── ForbiddenPage.jsx
+    │   │   ├── MaintenancePage.jsx
+    │   │   ├── NotFoundPage.jsx
+    │   │   ├── OfflinePage.jsx
+    │   │   ├── ServerErrorPage.jsx
+    │   │   ├── TimeoutPage.jsx
+    │   │   └── UnauthorizedPage.jsx
+    │   ├── user
+    │   │   ├── exercises
+    │   │   │   ├── UserExerciseDetailPage.jsx
+    │   │   │   └── UserExercisesPage.jsx
+    │   │   ├── mylists
+    │   │   │   ├── UserListDetailPage.jsx
+    │   │   │   ├── UserMyListAddItemPage.jsx
+    │   │   │   ├── UserMyListFormPage.jsx
+    │   │   │   └── UserMyListsPage.jsx
+    │   │   ├── plans
+    │   │   │   ├── UserPlanDetailPage.jsx
+    │   │   │   └── UserPlansPage.jsx
+    │   │   ├── uploads
+    │   │   │   └── UserUploadsPage.jsx
+    │   │   ├── UserDashboardPage.jsx
+    │   │   ├── UserExercisesList.jsx
+    │   │   ├── UserMyLists.jsx
+    │   │   ├── UserPlansList.jsx
+    │   │   ├── UserProfilePage.jsx
+    │   │   ├── UserUploadList.jsx
+    │   │   ├── UserWorkoutsList.jsx
+    │   │   └── workouts
+    │   │       ├── UserCreateWorkoutPage.jsx
+    │   │       ├── UserWorkoutDetailPage.jsx
+    │   │       └── UserWorkoutsPage.jsx
+    │   └── visitor
+    │       ├── AboutPage.jsx
+    │       ├── Accessibility.jsx
+    │       ├── ContactPage.jsx
+    │       ├── CookiesPolicy.jsx
+    │       ├── FeaturesPage.jsx
+    │       ├── HomePage.jsx
+    │       ├── LegalNoticePage.jsx
+    │       ├── PageDetailPage.jsx
+    │       ├── PageInfosList.jsx
+    │       ├── PolicyPage.jsx
+    │       ├── PricingPage.jsx
+    │       ├── SearchPage.jsx
+    │       ├── SwimExercise.jsx
+    │       ├── SwimPlan.jsx
+    │       └── SwimWorkout.jsx
+    ├── reportWebVitals.js
+    ├── routes
+    │   ├── AdminRoutes.jsx
+    │   ├── PrivateRoute.jsx
+    │   ├── PublicRoutes.jsx
+    │   ├── RoleBasedRoute.jsx
+    │   ├── Router.jsx
+    │   └── UserRoutes.jsx
+    ├── services
+    │   ├── api.js
+    │   ├── auth.js
+    │   ├── errorLogger.js
+    │   ├── exercises.js
+    │   ├── mylistItems.js
+    │   ├── mylists.js
+    │   ├── pages.js
+    │   ├── plans.js
+    │   ├── planWorkouts.js
+    │   ├── roles.js
+    │   ├── swimsets.js
+    │   ├── uploads.js
+    │   ├── users.js
+    │   ├── workoutExercises.js
+    │   ├── workouts.js
+    │   └── workoutSwimSets.js
+    ├── setupTests.js
+    └── utils
+        ├── api-fix.js
+        ├── constants.js
+        ├── formatters.js
+        ├── roles.js
+        ├── storage.js
+        └── validators.js
+

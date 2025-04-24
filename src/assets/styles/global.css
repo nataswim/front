@@ -1,0 +1,190 @@
+/* Import Bootstrap CSS */
+@import '~bootstrap/dist/css/bootstrap.min.css';
+@import '~bootstrap-icons/font/bootstrap-icons.css';
+
+/* Import custom variables and themes */
+@import './variables.css';
+@import './themes.css';
+
+/* Global Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: #f9f5f2;
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  font-family: var(--font-secondary);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+/* Links */
+a {
+  color: var(--link-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast) ease;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+/* Custom Utility Classes */
+.text-primary {
+  color: #048080 !important;
+}
+
+.bg-primary {
+  background-color: #5bcacb !important;
+  color: var(--text-on-primary);
+}
+
+/* Card Styles */
+.dashboard-card {
+  transition: transform var(--transition-normal) ease;
+  box-shadow: var(--shadow-subtle);
+}
+
+.dashboard-card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+/* Form Elements */
+.form-control {
+  border-color: var(--border-color);
+  transition: border-color var(--transition-fast) ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(33, 207, 198, 0.25);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Sidebar Styles */
+.sidebar {
+  background-color: var(--bg-dark);
+  color: var(--text-on-primary);
+  transition: width var(--transition-normal) ease;
+}
+
+.sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  transition: background-color var(--transition-fast) ease;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Styles personnalisés pour la barre de navigation admin */
+  /* Ajustement pour le contenu principal */
+
+  .bg-admin  {
+    --bs-bg-opacity: 1;
+    background-color: #2b676a !important;
+    color: #FFF !important;
+}
+.bg-home  {
+  background-color: #f9f5f3 !important;
+}
+.bg-user  {
+  background-color: #ecf0f3 !important;
+}
+
+/* Style pour le fond vidéo */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.video-iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw; /* Ratio 16:9 */
+  min-height: 100vh;
+  min-width: 177.78vh; /* Ratio 16:9 */
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* Désactiver l'interaction avec la vidéo */
+}
+
+/* Assombrir légèrement l'arrière-plan */
+.video-background::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Assombrissement */
+}
+
+/* Formulaire en arrière-plan flouté */
+.bg-opacity-90 {
+  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}

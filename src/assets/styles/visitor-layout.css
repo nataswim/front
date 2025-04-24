@@ -1,0 +1,168 @@
+/* Styles pour le layout utilisateur */
+.visitor-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.visitor-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #F8F5F1!important;
+
+}
+
+.visitor-main {
+  flex: 1;
+  background-color: #F8F5F1!important;
+  padding: 1rem;
+}
+
+bg-swim {
+  background-color: #5bcacb;
+}
+
+.visitor-bg {
+  background-color: #f9f5f2 !important;
+}
+
+.title-swim {
+  background-color: #ffffff;
+  padding: 15px 10px;
+  color: #048080;
+  text-align: center;
+  box-shadow: 0px 12px 18px -6px rgba(0, 0, 0, 0.3) !important;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+/* Ajustements pour le header */
+
+.visitor-header {
+  background-color: #f9f5f2;
+  border: 20px solid #5bcacb;
+  border-bottom: 1px dashed #5bcacb;
+  border-top: 5px dotted #ecf9fe;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+}
+
+.logo-wrapper {
+  background-color: #f5f4f0;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+.visitor-site-title {
+  color: #0175c5;
+}
+
+.visitor-menu-item {
+  background-color: #ecf0f3;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.visitor-profile-btn {
+  background-color: #21cfc6;
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.visitor-logout-btn {
+  background-color: #5bcacb;
+    padding: 10px;
+    border: none;
+    box-shadow: 0px 12px 18px -6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ajustements pour la navbar */
+.visitor-nav {
+  background-color: #f9f5f3;
+  box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+/* Ajustements pour le footer */
+.visitor-footer {
+  background-color: #048080;
+    color: #fff;
+    padding: 1rem 0;
+    border-left: 20px solid #5bcacb;
+    border-bottom: 40px solid #f9f5f4;
+    border-top: 40px solid #f9f5f4;
+    border-right: 20px solid #5bcacb;
+}
+
+.visitor-nav-link {
+  background-color: #f9f5f3;
+  color: #004f59;
+  padding: 10px 15px;
+  text-decoration: none;
+  border: none;
+  font-size: 130%;
+  margin: 10px;
+}
+
+.visitor-nav-link:hover,
+.visitor-nav-link:active,
+.visitor-nav-link:focus {
+  background-color: #5bcacb; 
+color: #000;  
+font-weight: 800;
+outline: 1px solid #ffffff; 
+  border: none;
+}
+
+.visitor-nav-link:active{
+    background-color: #e0e0e0;
+    border: none;
+}
+
+.dropdown-visitor, .dropdown-visitor:hover {
+  font-size: 120%;
+  line-height: 3rem;
+  text-decoration: none;
+  color: #343a40;
+  font-weight: 600;
+  display: block;
+}
+
+.dropdown-visitor.active, .dropdown-visitor:active {
+  color: #484757;
+    text-decoration: none;
+    background-color: #21cfc6;
+    display: block;
+    padding: 15px 5px;
+    font-weight: bolder;
+}
+.dropdown-menu.show {
+  display: block;
+  min-height: 200%;
+  background-color: #f9f5f3;
+  padding: 10px 10px;
+  border: 2px solid #5bcacb;
+  min-width: 200%;
+}
+
+.banner-container-outer {
+  width: 100%;
+  background-color: #5bcacb;
+  display: flex;
+  justify-content: center;
+}
+
+.banner-wrapper {
+  max-height: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner-image {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
