@@ -213,15 +213,31 @@ const AdminExercisesPage = () => {
 
   return (
     <div className="container-fluid py-4">
+
+         {/* Titre Section */}
+         <div className="row mb-4">
+                 <div className="col-12">
+                   <div className="card border-0 shadow-sm">
+                     <div className="card-header bg-primary-subtle">
+                       <h2 className="card-title mb-0">
+                         <FaDumbbell className="me-2" />
+                         Gestion des Exercices
+                       </h2>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="h2 mb-0">Gestion des Exercices</h1>
           <p className="text-muted mb-0">
             {exercises.length} exercice{exercises.length > 1 ? 's' : ''} au total
           </p>
         </div>
+ 
+
         <button 
-          className="btn btn-primary d-flex align-items-center"
+          className="btn btn-success btn-lg d-flex align-items-center"
           onClick={() => navigate('/admin/exercises/new')}
         >
           <FaPlus className="me-2" /> Nouvel exercice

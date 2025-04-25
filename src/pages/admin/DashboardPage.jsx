@@ -168,31 +168,87 @@ const DashboardPage = () => {
 
   return (
     <div className="dashboard-container">
+      
+
+      {/* Tableau de bord Manager */}
       <div className="row mb-4">
         <div className="col-12">
           <div className="card border-0 shadow-sm">
-            <div className="card-body">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaCog className="me-2" />
+                Tableau de bord Manager
+              </h2>
+            </div>
+            
+           
+          </div>
+        </div>
+      </div>
+
+      {/* Statistiques globales */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-white">
               <h5 className="card-title mb-0">
-                <FaChartLine className="me-3" />
-                Espace Manager
+                <FaChartLine className="me-2" />
+                Statistiques
               </h5>
-              <div className="mt-3 d-flex align-items-center text-muted">
-                <FaNetworkWired className="me-2" />
-                <span>Adresse IP: <strong>{connectionInfo.ip}</strong> | Navigateur: <strong>{connectionInfo.browser}</strong> | Système: <strong>{connectionInfo.os}</strong></span>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                {[
+                  { key: 'users', icon: FaUsers, label: 'Utilisateurs | Voir==>', color: 'primary-subtle', link: '/admin/users' },
+                  { key: 'exercises', icon: FaDumbbell, label: 'Exercices | Voir==>', color: 'primary-subtle', link: '/admin/exercises' },
+                  { key: 'workouts', icon: FaSwimmer, label: 'Séances | Voir==>', color: 'primary-subtle', link: '/admin/workouts' },
+                  { key: 'plans', icon: FaCalendarAlt, label: 'Plans | Voir==>', color: 'primary-subtle', link: '/admin/plans' },
+                  { key: 'pages', icon: FaFileAlt, label: 'Pages | Voir==>', color: 'primary-subtle', link: '/admin/pages' },
+                  { key: 'swimSets', icon: FaListAlt, label: 'Séries | Voir==>', color: 'primary-subtle', link: '/admin/swim-sets' }
+                ].map(({ key, icon: Icon, label, color, link }) => (
+                  <div key={key} className="col-md-4 col-sm-6">
+                    <Link to={link} className="text-decoration-none">
+                      <div className={`card border-${color} hover-shadow h-100`}>
+                        <div className="card-body p-4">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h3 className={`text-${color} fw-bold display-5`}>{stats[key]}</h3>
+                              <h5 className="text-muted">{label}</h5>
+                            </div>
+                            <div className={`bg-${color} bg-opacity-10 p-3 rounded-circle`}>
+                              <Icon className={`text-${color} fs-1`} />
+                            </div>
+                          </div>
+                          <div className="progress mt-3" style={{ height: "5px" }}>
+                            <div 
+                              className={`progress-bar bg-warning`} 
+                              role="progressbar" 
+                              style={{ width: `50%` }}
+                              aria-valuenow={stats[key]} 
+                              aria-valuemin="0" 
+                              aria-valuemax="100">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Actions rapides */}
-      <div className="row mb-4">
+
+{/* Actions création */}
+<div className="row mb-4">
         <div className="col-12">
           <div className="card border-0 shadow-sm">
             <div className="card-header bg-white">
               <h5 className="card-title mb-0">
                 <FaCog className="me-2" />
-                Actions rapides
+                Création
               </h5>
             </div>
             <div className="card-body">
@@ -211,60 +267,22 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Statistiques globales */}
       <div className="row mb-4">
         <div className="col-12">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-white">
-              <h5 className="card-title mb-0">
-                <FaChartLine className="me-2" />
-                Statistiques
-              </h5>
-            </div>
+          <div className="card border-0 shadow-sm bg-primary-subtle">
             <div className="card-body">
-              <div className="row g-3">
-                {[
-                  { key: 'users', icon: FaUsers, label: 'Utilisateurs', color: 'primary', link: '/admin/users' },
-                  { key: 'exercises', icon: FaDumbbell, label: 'Exercices', color: 'success', link: '/admin/exercises' },
-                  { key: 'workouts', icon: FaSwimmer, label: 'Séances', color: 'info', link: '/admin/workouts' },
-                  { key: 'plans', icon: FaCalendarAlt, label: 'Plans', color: 'warning', link: '/admin/plans' },
-                  { key: 'pages', icon: FaFileAlt, label: 'Pages', color: 'danger', link: '/admin/pages' },
-                  { key: 'swimSets', icon: FaListAlt, label: 'Séries', color: 'secondary', link: '/admin/swim-sets' }
-                ].map(({ key, icon: Icon, label, color, link }) => (
-                  <div key={key} className="col-md-4 col-sm-6">
-                    <Link to={link} className="text-decoration-none">
-                      <div className={`card border-${color} hover-shadow h-100`}>
-                        <div className="card-body p-4">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                              <h3 className={`text-${color} fw-bold display-5`}>{stats[key]}</h3>
-                              <h5 className="text-muted">{label}</h5>
-                            </div>
-                            <div className={`bg-${color} bg-opacity-10 p-3 rounded-circle`}>
-                              <Icon className={`text-${color} fs-1`} />
-                            </div>
-                          </div>
-                          <div className="progress mt-3" style={{ height: "5px" }}>
-                            <div 
-                              className={`progress-bar bg-${color}`} 
-                              role="progressbar" 
-                              style={{ width: `${Math.min(100, stats[key] * 2)}%` }}
-                              aria-valuenow={stats[key]} 
-                              aria-valuemin="0" 
-                              aria-valuemax="100">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                ))}
+              <h5 className="card-title mb-0">
+                <FaChartLine className="me-3" />
+                Infos
+              </h5>
+              <div className="mt-3 d-flex align-items-center">
+                <FaNetworkWired className="me-2" />
+                <span>Adresse IP: <strong>{connectionInfo.ip}</strong> <br></br>| Navigateur: <strong>{connectionInfo.browser}</strong> <br></br>| Système: <strong>{connectionInfo.os}</strong></span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
       
     </div>
   );

@@ -15,7 +15,9 @@ import {
   FaSortUp,
   FaSortDown,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
+  FaLink,
+  FaUnlink
 } from 'react-icons/fa';
 import { 
   getWorkout, 
@@ -68,7 +70,7 @@ const WorkoutFormPage = () => {
 
   // Pagination state for sets
   const [setsCurrentPage, setSetsCurrentPage] = useState(1);
-  const [setsPerPage, setSetsPerPage] = useState(5);
+  const [setsPerPage, setSetsPerPage] = useState(10); // Modifié de 5 à 10
 
   // Pagination state for plans
   const [plansCurrentPage, setPlansCurrentPage] = useState(1);
@@ -296,6 +298,26 @@ const WorkoutFormPage = () => {
         return [...prev, setId];
       }
     });
+  };
+
+  /**
+   * 🇬🇧 Handle set association
+   * 🇫🇷 Gérer l'association d'une série
+   */
+  const handleSetAssociate = (setId) => {
+    if (!selectedSets.includes(setId)) {
+      setSelectedSets(prev => [...prev, setId]);
+    }
+  };
+
+  /**
+   * 🇬🇧 Handle set removal
+   * 🇫🇷 Gérer la suppression d'une série
+   */
+  const handleSetRemove = (setId) => {
+    if (selectedSets.includes(setId)) {
+      setSelectedSets(prev => prev.filter(id => id !== setId));
+    }
   };
   
   /**
@@ -532,47 +554,69 @@ const WorkoutFormPage = () => {
    */
   const paginate = (pageNumber, setPage) => setPage(pageNumber);
 
-  /**
-   * 🇬🇧 Render pagination controls
-   * 🇫🇷 Afficher les contrôles de pagination
-   */
-  const renderPagination = (currentPage, totalPages, paginate, setPage) => {
-    if (totalPages <= 1) return null;
+ /**
+ * 🇬🇧 Render pagination controls with proper event handling
+ * 🇫🇷 Afficher les contrôles de pagination avec une gestion correcte des événements
+ */
+const renderPagination = (currentPage, totalPages, paginate, setPage) => {
+  if (totalPages <= 1) return null;
 
-    return (
-      <div className="d-flex justify-content-between align-items-center mt-3">
-        <button 
-          className="btn btn-sm btn-outline-secondary" 
-          onClick={() => paginate(currentPage - 1, setPage)}
-          disabled={currentPage === 1}
-        >
-          <FaChevronLeft /> Précédent
-        </button>
-        
-        <div className="px-2">
-          Page {currentPage} sur {totalPages}
-        </div>
-        
-        <button 
-          className="btn btn-sm btn-outline-secondary" 
-          onClick={() => paginate(currentPage + 1, setPage)}
-          disabled={currentPage === totalPages}
-        >
-          Suivant <FaChevronRight />
-        </button>
-      </div>
-    );
+  const handlePageChange = (e, newPage) => {
+    e.preventDefault(); // Empêcher le comportement par défaut
+    e.stopPropagation(); // Empêcher la propagation de l'événement
+    paginate(newPage, setPage);
   };
 
   return (
-    <div className="container py-4">
+    <div className="d-flex justify-content-between align-items-center mt-3">
       <button 
-        className="btn btn-outline-primary mb-4" 
+        className="btn btn-sm btn-outline-secondary" 
+        onClick={(e) => handlePageChange(e, currentPage - 1)}
+        disabled={currentPage === 1}
+        type="button" // Spécifier explicitement le type pour éviter toute soumission de formulaire
+      >
+        <FaChevronLeft /> Précédent
+      </button>
+      
+      <div className="px-2">
+        Page {currentPage} sur {totalPages}
+      </div>
+      
+      <button 
+        className="btn btn-sm btn-outline-secondary" 
+        onClick={(e) => handlePageChange(e, currentPage + 1)}
+        disabled={currentPage === totalPages}
+        type="button" // Spécifier explicitement le type pour éviter toute soumission de formulaire
+      >
+        Suivant <FaChevronRight />
+      </button>
+    </div>
+  );
+};
+
+  return (
+    <div className="container py-4">
+          {/* Titre Section */}
+                     <div className="row mb-4">
+                             <div className="col-12">
+                               <div className="card border-0 shadow-sm">
+                                 <div className="card-header bg-primary-subtle">
+                                   <h2 className="card-title mb-0">
+                                     <FaPlus className="me-2" />
+                                     Création Modification Des Séances
+                                   </h2>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                           <br></br>
+      <button 
+        className="btn btn-success btn-lg d-flex align-items-center" 
         onClick={() => navigate('/admin/workouts')}
       >
         <FaArrowLeft className="me-2" /> Retour à la liste
       </button>
-
+      <br></br>
       <div className="card shadow mb-4">
         <div className="card-header bg-white">
           <h5 className="card-title mb-0">
@@ -703,10 +747,10 @@ const WorkoutFormPage = () => {
                           }}
                           style={{width: '70px'}}
                         >
-                          <option value="5">5</option>
                           <option value="10">10</option>
                           <option value="15">15</option>
                           <option value="20">20</option>
+                          <option value="25">25</option>
                         </select>
                         <span className="ms-2">par page</span>
                       </div>
@@ -743,7 +787,12 @@ const WorkoutFormPage = () => {
                       {/* Afficher un message si des séries sont sélectionnées */}
                       {selectedSets.length > 0 && (
                         <div className="alert alert-success mb-3">
-                          <FaRegCheckSquare className="me-2" />
+
+
+
+
+
+<FaRegCheckSquare className="me-2" />
                           {selectedSets.length} {selectedSets.length === 1 ? 'série sélectionnée' : 'séries sélectionnées'}
                           {/* Bouton pour désélectionner toutes les séries */}
                           <button 
@@ -761,13 +810,6 @@ const WorkoutFormPage = () => {
                           <thead className="table-light">
                             <tr>
                               <th style={{width: "50px"}}></th>
-                              <th 
-                                style={{cursor: 'pointer'}} 
-                                onClick={() => requestSetsSort('id')}
-                                className="d-flex align-items-center"
-                              >
-                                ID {getSortDirectionIcon('id', setsSortConfig)}
-                              </th>
                               <th 
                                 style={{cursor: 'pointer'}}
                                 onClick={() => requestSetsSort('exerciseTitle')}
@@ -796,21 +838,13 @@ const WorkoutFormPage = () => {
                               >
                                 Repos {getSortDirectionIcon('rest_time', setsSortConfig)}
                               </th>
-                              <th 
-                                className="text-center"
-                                style={{cursor: 'pointer'}}
-                                onClick={() => requestSetsSort('totalDistance')}
-                              >
-                                Total {getSortDirectionIcon('totalDistance', setsSortConfig)}
-                              </th>
+                              <th style={{width: "150px"}} className="text-center">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {currentSets.map((set) => (
                               <tr 
                                 key={set.id}
-                                onClick={() => handleSetToggle(set.id)}
-                                style={{cursor: 'pointer'}}
                                 className={selectedSets.includes(set.id) ? 'table-primary' : ''}
                               >
                                 <td className="text-center">
@@ -820,13 +854,31 @@ const WorkoutFormPage = () => {
                                     <FaRegSquare className="text-muted" />
                                   )}
                                 </td>
-                                <td>{set.id}</td>
                                 <td>{set.exerciseTitle}</td>
                                 <td className="text-center">x{set.set_repetition || 1}</td>
                                 <td className="text-center">{set.set_distance} m</td>
                                 <td className="text-center">{formatRestTime(set.rest_time)}</td>
-                                <td className="text-center fw-bold">
-                                  {set.totalDistance} m
+                                <td className="text-center">
+                                  <div className="btn-group btn-group-sm">
+                                    <button 
+                                      type="button"
+                                      className="btn btn-outline-success"
+                                      onClick={() => handleSetAssociate(set.id)}
+                                      disabled={selectedSets.includes(set.id)}
+                                      title="Associer cette série"
+                                    >
+                                      <FaLink />
+                                    </button>
+                                    <button 
+                                      type="button"
+                                      className="btn btn-outline-danger"
+                                      onClick={() => handleSetRemove(set.id)}
+                                      disabled={!selectedSets.includes(set.id)}
+                                      title="Enlever cette série"
+                                    >
+                                      <FaUnlink />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -980,22 +1032,25 @@ const WorkoutFormPage = () => {
                         </div>
                       </div>
 
-                      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                         {currentPlans.map((plan) => (
                           <div key={plan.id} className="col">
                             <div 
-                              className={`card h-100 ${selectedPlans.includes(plan.id) ? 'border-primary' : ''}`}
-                              onClick={() => handlePlanToggle(plan.id)}
-                              style={{cursor: 'pointer'}}
+                              className={`card h-100 shadow-sm ${selectedPlans.includes(plan.id) ? 'border-primary' : ''}`}
+                              style={{transition: 'all 0.3s ease'}}
                             >
                               <div className="card-body">
-                                <div className="d-flex align-items-center mb-2">
-                                  {selectedPlans.includes(plan.id) ? (
-                                    <FaRegCheckSquare className="text-primary me-2" />
-                                  ) : (
-                                    <FaRegSquare className="text-muted me-2" />
-                                  )}
+                                <div className="d-flex align-items-center justify-content-between mb-2">
                                   <h6 className="card-title mb-0">{plan.title}</h6>
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      checked={selectedPlans.includes(plan.id)}
+                                      onChange={() => handlePlanToggle(plan.id)}
+                                      id={`plan-check-${plan.id}`}
+                                    />
+                                  </div>
                                 </div>
                                 <div className="mt-2">
                                   {plan.plan_category && (
@@ -1009,13 +1064,7 @@ const WorkoutFormPage = () => {
                                     </span>
                                   )}
                                 </div>
-                                {plan.description && (
-                                  <p className="card-text small text-muted mt-2">
-                                    {plan.description.length > 60 
-                                      ? plan.description.substring(0, 60) + '...' 
-                                      : plan.description}
-                                  </p>
-                                )}
+                               
                               </div>
                             </div>
                           </div>
@@ -1032,7 +1081,7 @@ const WorkoutFormPage = () => {
               <div className="text-end">
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn btn-danger btn-lg d-flex align-items-center"
                   disabled={saving}
                 >
                   {saving ? (
@@ -1042,7 +1091,7 @@ const WorkoutFormPage = () => {
                     </>
                   ) : (
                     <>
-                      <FaSave className="me-2" /> Enregistrer
+                      <FaSave className="me-2" /> Enregistrer Cette Séance
                     </>
                   )}
                 </button>

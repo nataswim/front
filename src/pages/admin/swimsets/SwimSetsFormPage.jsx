@@ -6,7 +6,9 @@ import {
   FaSwimmer, 
   FaRunning, 
   FaStopwatch, 
-  FaRedoAlt 
+  FaRedoAlt,
+  FaCalculator,
+  FaInfoCircle
 } from 'react-icons/fa';
 import { getSwimSet, createSwimSet, updateSwimSet } from '../../../services/swimsets';
 import { getWorkouts } from '../../../services/workouts';
@@ -97,7 +99,7 @@ const SwimSetsFormPage = () => {
         ]);
 
         const workoutsData = workoutsResponse.data;
-const exercisesData = exercisesResponse.data;
+        const exercisesData = exercisesResponse.data;
 
         console.log(`${workoutsData.length} séances chargées`);
         console.log(`${exercisesData.length} exercices chargés`);
@@ -232,126 +234,165 @@ const exercisesData = exercisesResponse.data;
   };
 
   return (
-    <div className="container py-4">
-      <button 
-        className="btn btn-outline-primary mb-4" 
-        onClick={() => navigate('/admin/swim-sets')}
-      >
-        <FaArrowLeft className="me-2" /> Retour à la liste
-      </button>
-
-      <div className="card shadow">
-        <div className="card-header bg-white">
-          <h5 className="card-title mb-0">
-            {isEditMode ? "Modifier la série" : "Créer une nouvelle série"}
-          </h5>
-        </div>
-
-        <div className="card-body">
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Chargement...</span>
-              </div>
+    <div className="container-fluid py-4">
+      {/* Titre Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaSwimmer className="me-2" />
+                {isEditMode ? "Modifier la série" : "Créer une nouvelle série"}
+              </h2>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <button 
+          className="btn btn-outline-primary d-flex align-items-center"
+          onClick={() => navigate('/admin/swim-sets')}
+        >
+          <FaArrowLeft className="me-2" /> Retour à la liste
+        </button>
+        
+        <button
+          type="button"
+          className="btn btn-success d-flex align-items-center"
+          onClick={() => document.getElementById('swim-set-form').requestSubmit()}
+          disabled={saving}
+        >
+          {saving ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Enregistrement...
+            </>
           ) : (
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              )}
+            <>
+              <FaSave className="me-2" /> Enregistrer
+            </>
+          )}
+        </button>
+      </div>
 
-              <div className="mb-4">
-                <label htmlFor="workout_id" className="form-label">Séance d'entraînement</label>
-                <select
-                  className="form-select"
-                  id="workout_id"
-                  name="workout_id"
-                  value={formData.workout_id}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Sélectionner une séance</option>
-                  {workouts.length > 0 ? (
-                    workouts.map((workout) => (
-                      <option key={workout.id} value={workout.id}>
-                        {workout.title}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Chargement des séances...</option>
-                  )}
-                </select>
-                
-                {selectedWorkout && (
-                  <div className="mt-2 p-2 bg-light rounded">
-                    <p className="text-muted small mb-1">
-                      {selectedWorkout.description ? 
-                        selectedWorkout.description : 
-                        "Aucune description disponible"
-                      }
-                    </p>
-                    {selectedWorkout.workout_category && (
-                      <span className="badge bg-primary bg-opacity-10 text-primary">
-                        <FaRunning className="me-1" /> {selectedWorkout.workout_category}
-                      </span>
+      {error && (
+        <div className="alert alert-danger d-flex align-items-center" role="alert">
+          <FaInfoCircle className="me-2" />
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="card shadow-sm">
+          <div className="card-body text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Chargement...</span>
+            </div>
+            <p className="mt-3">Chargement des données...</p>
+          </div>
+        </div>
+      ) : (
+        <form id="swim-set-form" onSubmit={handleSubmit}>
+          <div className="row">
+            <div className="col-lg-6">
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-white">
+                  <h5 className="card-title mb-0">Informations principales</h5>
+                </div>
+                <div className="card-body">
+                  <div className="mb-4">
+                    <label htmlFor="workout_id" className="form-label">Séance d'entraînement</label>
+                    <select
+                      className="form-select"
+                      id="workout_id"
+                      name="workout_id"
+                      value={formData.workout_id}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Sélectionner une séance</option>
+                      {workouts.length > 0 ? (
+                        workouts.map((workout) => (
+                          <option key={workout.id} value={workout.id}>
+                            {workout.title}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>Chargement des séances...</option>
+                      )}
+                    </select>
+                    
+                    {selectedWorkout && (
+                      <div className="mt-2 p-2 bg-light rounded">
+                        <p className="text-muted small mb-1">
+                          {selectedWorkout.description ? 
+                            selectedWorkout.description : 
+                            "Aucune description disponible"
+                          }
+                        </p>
+                        {selectedWorkout.workout_category && (
+                          <span className="badge bg-primary bg-opacity-10 text-primary">
+                            <FaRunning className="me-1" /> {selectedWorkout.workout_category}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
 
-              <div className="mb-4">
-                <label htmlFor="exercise_id" className="form-label">Exercice</label>
-                <select
-                  className="form-select"
-                  id="exercise_id"
-                  name="exercise_id"
-                  value={formData.exercise_id}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Sélectionner un exercice</option>
-                  {exercises.length > 0 ? (
-                    exercises.map((exercise) => (
-                      <option key={exercise.id} value={exercise.id}>
-                        {exercise.title}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Chargement des exercices...</option>
-                  )}
-                </select>
-                
-                {selectedExercise && (
-                  <div className="mt-2 p-2 bg-light rounded">
-                    <p className="text-muted small mb-1">
-                      {selectedExercise.description ? 
-                        selectedExercise.description : 
-                        "Aucune description disponible"
-                      }
-                    </p>
-                    <div>
-                      {selectedExercise.exercise_level && (
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary me-2">
-                          {selectedExercise.exercise_level}
-                        </span>
+                  <div className="mb-4">
+                    <label htmlFor="exercise_id" className="form-label">Exercice</label>
+                    <select
+                      className="form-select"
+                      id="exercise_id"
+                      name="exercise_id"
+                      value={formData.exercise_id}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Sélectionner un exercice</option>
+                      {exercises.length > 0 ? (
+                        exercises.map((exercise) => (
+                          <option key={exercise.id} value={exercise.id}>
+                            {exercise.title}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>Chargement des exercices...</option>
                       )}
-                      {selectedExercise.exercise_category && (
-                        <span className="badge bg-info bg-opacity-10 text-info">
-                          <FaSwimmer className="me-1" /> {selectedExercise.exercise_category}
-                        </span>
-                      )}
-                    </div>
+                    </select>
+                    
+                    {selectedExercise && (
+                      <div className="mt-2 p-2 bg-light rounded">
+                        <p className="text-muted small mb-1">
+                          {selectedExercise.description ? 
+                            selectedExercise.description : 
+                            "Aucune description disponible"
+                          }
+                        </p>
+                        <div>
+                          {selectedExercise.exercise_level && (
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary me-2">
+                              {selectedExercise.exercise_level}
+                            </span>
+                          )}
+                          {selectedExercise.exercise_category && (
+                            <span className="badge bg-info bg-opacity-10 text-info">
+                              <FaSwimmer className="me-1" /> {selectedExercise.exercise_category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="card mb-4">
-                <div className="card-header">
-                  <h6 className="mb-0">
-                    <FaSwimmer className="me-2" /> Distance
-                  </h6>
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-white">
+                  <h5 className="card-title mb-0 d-flex align-items-center">
+                    <FaSwimmer className="me-2 text-primary" /> Distance
+                  </h5>
                 </div>
                 <div className="card-body">
                   <div className="mb-3">
@@ -388,14 +429,16 @@ const exercisesData = exercisesResponse.data;
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="row mb-4">
+            <div className="col-lg-6">
+              <div className="row">
                 <div className="col-md-6">
-                  <div className="card h-100">
-                    <div className="card-header">
-                      <h6 className="mb-0">
-                        <FaRedoAlt className="me-2" /> Répétitions
-                      </h6>
+                  <div className="card shadow-sm mb-4 h-100">
+                    <div className="card-header bg-white">
+                      <h5 className="card-title mb-0 d-flex align-items-center">
+                        <FaRedoAlt className="me-2 text-primary" /> Répétitions
+                      </h5>
                     </div>
                     <div className="card-body">
                       <div className="mb-3">
@@ -431,11 +474,11 @@ const exercisesData = exercisesResponse.data;
                 </div>
 
                 <div className="col-md-6">
-                  <div className="card h-100">
-                    <div className="card-header">
-                      <h6 className="mb-0">
-                        <FaStopwatch className="me-2" /> Temps de repos
-                      </h6>
+                  <div className="card shadow-sm mb-4 h-100">
+                    <div className="card-header bg-white">
+                      <h5 className="card-title mb-0 d-flex align-items-center">
+                        <FaStopwatch className="me-2 text-primary" /> Temps de repos
+                      </h5>
                     </div>
                     <div className="card-body">
                       <div className="mb-3">
@@ -475,9 +518,13 @@ const exercisesData = exercisesResponse.data;
               </div>
 
               {/* Résumé */}
-              <div className="card bg-light mb-4">
-                <div className="card-body">
-                  <h6 className="card-title">Résumé de la série</h6>
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-white">
+                  <h5 className="card-title mb-0 d-flex align-items-center">
+                    <FaCalculator className="me-2 text-primary" /> Résumé de la série
+                  </h5>
+                </div>
+                <div className="card-body bg-light">
                   <div className="row">
                     <div className="col-md-4 mb-2">
                       <span className="text-muted">Distance par répétition:</span>
@@ -494,34 +541,20 @@ const exercisesData = exercisesResponse.data;
                     <div className="col-12 mt-2">
                       <hr className="my-2" />
                       <span className="text-muted">Distance totale:</span>
-                      <p className="h4 text-primary fw-bold mb-0">{calculateTotalDistance()} m</p>
+                      <div className="d-flex align-items-center">
+                        <p className="h4 text-primary fw-bold mb-0">{calculateTotalDistance()} m</p>
+                        <span className="badge bg-info ms-2">
+                          <FaCalculator className="me-1" /> {formData.set_distance || 0} × {formData.set_repetition || 1}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div className="text-end">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Enregistrement...
-                    </>
-                  ) : (
-                    <>
-                      <FaSave className="me-2" /> Enregistrer
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
+            </div>
+          </div>
+        </form>
+      )}
     </div>
   );
 };

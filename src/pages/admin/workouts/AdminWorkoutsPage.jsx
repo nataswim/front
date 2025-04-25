@@ -9,12 +9,9 @@ import {
   FaSearch, 
   FaSync,
   FaSwimmer,
-  FaDumbbell,
-  FaClock,
   FaSort,
   FaSortAmountDown,
   FaSortAmountUp,
-  FaRulerHorizontal,
   FaLayerGroup
 } from 'react-icons/fa';
 import { getWorkouts, deleteWorkout } from '../../../services/workouts';
@@ -31,7 +28,7 @@ const AdminWorkoutsPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({
-    key: 'id',
+    key: 'title',
     direction: 'ascending'
   });
 
@@ -49,40 +46,20 @@ const AdminWorkoutsPage = () => {
       const workoutsWithAdditionalData = await Promise.all(
         response.data.map(async (workout) => {
           try {
-            // Fetch exercises
-            const exercisesResponse = await axios.get(`http://127.0.0.1:8000/api/workouts/${workout.id}/exercises`);
-            const exercisesCount = exercisesResponse.data.length;
-            
             // Fetch swim sets
             const setsResponse = await axios.get(`http://127.0.0.1:8000/api/workouts/${workout.id}/swim-sets`);
             const sets = setsResponse.data;
             const setsCount = sets.length;
             
-            // Calculate total distance
-            const totalDistance = sets.reduce((acc, set) => {
-              return acc + ((set.set_distance || 0) * (set.set_repetition || 1));
-            }, 0);
-            
-            // Calculate approximate duration (very simplified)
-            // Assuming 1 minute per 100m with some rest time
-            const estimatedDuration = Math.ceil(totalDistance / 100) + 
-                                     sets.reduce((acc, set) => acc + (set.rest_time || 0)/60, 0);
-            
             return {
               ...workout,
-              exercisesCount,
-              setsCount,
-              totalDistance,
-              estimatedDuration
+              setsCount
             };
           } catch (err) {
             console.error(`Error fetching details for workout ${workout.id}:`, err);
             return {
               ...workout,
-              exercisesCount: 0,
-              setsCount: 0,
-              totalDistance: 0,
-              estimatedDuration: 0
+              setsCount: 0
             };
           }
         })
@@ -162,26 +139,6 @@ const AdminWorkoutsPage = () => {
     }
   };
 
-  // Format distance with units
-  const formatDistance = (meters) => {
-    if (meters >= 1000) {
-      return `${(meters/1000).toFixed(1)} km`;
-    }
-    return `${meters} m`;
-  };
-
-  // Format duration
-  const formatDuration = (minutes) => {
-
-    const mins = Math.round(minutes);
-    if (mins >= 60) {
-    const hours = Math.floor(mins / 60);
-    const remainingMins = mins % 60;
-    return `${hours}h ${remainingMins > 0 ? remainingMins + 'min' : ''}`;
-  }
-  return `${mins} min`;
-};
-
   if (loading) {
     return (
       <div className="container py-4">
@@ -196,18 +153,32 @@ const AdminWorkoutsPage = () => {
 
   return (
     <div className="container-fluid py-4">
+
+      {/* Titre Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaSwimmer className="me-2" />
+                Gestion des Séances
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="h2 mb-0">Gestion des Séances</h1>
           <p className="text-muted mb-0">
             {workouts.length} séance{workouts.length > 1 ? 's' : ''} au total
           </p>
         </div>
         <button 
-          className="btn btn-primary d-flex align-items-center"
+          className="btn btn-success btn-lg d-flex align-items-center"
           onClick={() => navigate('/admin/workouts/new')}
         >
-          <FaPlus className="me-2" /> Nouvelle séance
+          <FaPlus className="me-2" /> Ajouter Une Séance
         </button>
       </div>
 
@@ -275,13 +246,6 @@ const AdminWorkoutsPage = () => {
                   <th 
                     className="cursor-pointer"
                     style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('id')}
-                  >
-                    ID {getSortIcon('id')}
-                  </th>
-                  <th 
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
                     onClick={() => requestSort('title')}
                   >
                     Titre {getSortIcon('title')}
@@ -296,34 +260,10 @@ const AdminWorkoutsPage = () => {
                   <th 
                     className="cursor-pointer text-center"
                     style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('exercisesCount')}
-                  >
-                    <FaDumbbell className="me-1" /> 
-                    Exercices {getSortIcon('exercisesCount')}
-                  </th>
-                  <th 
-                    className="cursor-pointer text-center"
-                    style={{cursor: 'pointer'}}
                     onClick={() => requestSort('setsCount')}
                   >
                     <FaLayerGroup className="me-1" /> 
                     Séries {getSortIcon('setsCount')}
-                  </th>
-                  <th 
-                    className="cursor-pointer text-center"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('totalDistance')}
-                  >
-                    <FaRulerHorizontal className="me-1" /> 
-                    Distance {getSortIcon('totalDistance')}
-                  </th>
-                  <th 
-                    className="cursor-pointer text-center"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('estimatedDuration')}
-                  >
-                    <FaClock className="me-1" /> 
-                    Durée {getSortIcon('estimatedDuration')}
                   </th>
                   <th className="text-center">Actions</th>
                 </tr>
@@ -331,14 +271,13 @@ const AdminWorkoutsPage = () => {
               <tbody>
                 {currentWorkouts.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-4">
+                    <td colSpan="4" className="text-center py-4">
                       Aucune séance ne correspond à vos critères de recherche.
                     </td>
                   </tr>
                 ) : (
                   currentWorkouts.map((workout) => (
                     <tr key={workout.id}>
-                      <td>{workout.id}</td>
                       <td>
                         <span className="fw-medium">{workout.title}</span>
                       </td>
@@ -354,23 +293,8 @@ const AdminWorkoutsPage = () => {
                         </span>
                       </td>
                       <td className="text-center">
-                        <span className="badge bg-primary">
-                          <FaDumbbell className="me-1" /> {workout.exercisesCount}
-                        </span>
-                      </td>
-                      <td className="text-center">
                         <span className="badge bg-secondary">
                           <FaLayerGroup className="me-1" /> {workout.setsCount}
-                        </span>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-info text-dark">
-                          <FaSwimmer className="me-1" /> {formatDistance(workout.totalDistance)}
-                        </span>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-dark">
-                          <FaClock className="me-1" /> {formatDuration(workout.estimatedDuration)}
                         </span>
                       </td>
                       <td>

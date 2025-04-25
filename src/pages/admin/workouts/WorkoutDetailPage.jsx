@@ -14,11 +14,12 @@ import {
   FaSwimmer, 
   FaDumbbell, 
   FaCalendarAlt, 
-  FaClock, 
   FaRulerHorizontal, 
   FaRedoAlt, 
   FaStopwatch,
-  FaChartLine
+  FaChartLine,
+  FaExternalLinkAlt,
+  FaUser
 } from 'react-icons/fa';
 
 /**
@@ -103,25 +104,6 @@ const WorkoutDetailPage = () => {
     fetchWorkoutData();
   }, [id]);
 
-  // Formater la durée totale d'une séance en fonction des séries
-  const calculateTotalTime = (sets) => {
-    if (!sets || sets.length === 0) return "N/A";
-    
-    // Calculer le temps total en additionnant la distance * répétitions + temps de repos
-    let totalSeconds = 0;
-    sets.forEach(set => {
-      // Estimer ~1 minute par 100m de nage (très approximatif)
-      const swimTimeSeconds = (set.set_distance / 100) * 60 * (set.set_repetition || 1);
-      totalSeconds += swimTimeSeconds + (set.rest_time || 0);
-    });
-    
-    // Convertir en format hh:mm
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    
-    return `${hours > 0 ? hours + 'h ' : ''}${minutes > 0 ? minutes + 'min' : ''}`;
-  };
-
   // Calculer la distance totale d'une séance
   const calculateTotalDistance = (sets) => {
     if (!sets || sets.length === 0) return 0;
@@ -164,11 +146,10 @@ const WorkoutDetailPage = () => {
   if (loading) {
     return (
       <div className="container py-4">
-        <div className="text-center py-5">
+        <div className="text-center">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Chargement...</span>
           </div>
-          <p className="mt-3">Chargement des données...</p>
         </div>
       </div>
     );
@@ -181,7 +162,7 @@ const WorkoutDetailPage = () => {
           {error}
         </div>
         <button 
-          className="btn btn-outline-secondary" 
+          className="btn btn-outline-primary" 
           onClick={() => navigate('/admin/workouts')}
         >
           <FaArrowLeft className="me-2" /> Retour à la liste
@@ -197,7 +178,7 @@ const WorkoutDetailPage = () => {
           Séance non trouvée
         </div>
         <button 
-          className="btn btn-outline-secondary" 
+          className="btn btn-outline-primary" 
           onClick={() => navigate('/admin/workouts')}
         >
           <FaArrowLeft className="me-2" /> Retour à la liste
@@ -218,190 +199,245 @@ const WorkoutDetailPage = () => {
 
   return (
     <div className="container-fluid py-4">
-      {/* 1. Titre et navigation */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="d-flex align-items-center">
-          <button 
-            className="btn btn-outline-secondary me-3" 
-            onClick={() => navigate('/admin/workouts')}
-          >
-            <FaArrowLeft className="me-2" /> Retour
-          </button>
-          <div>
-            <h1 className="h2 mb-0">{workout.title}</h1>
-            {workout.workout_category && (
+      {/* 1. Titre Section - en pleine largeur */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle bg-gradient py-3">
+              <h2 className="card-title mb-0 text-center fs-2">
+                <FaEdit className="me-2" />
+                {workout.title}
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Distance totale et Catégorie - cartes séparées */}
+      <div className="row mb-4">
+        <div className="col-md-6 mb-3 mb-md-0">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">Distance totale</h2>
+            </div>
+            <div className="card-body d-flex align-items-center justify-content-center">
+              <span className="badge bg-primary fs-4 px-4 py-2">
+                {formatDistance(totalDistance)}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-6">
+          <div className="card shadow-sm h-100">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">Catégorie</h2>
+            </div>
+            <div className="card-body d-flex align-items-center">
               <span className={`badge bg-${
                 workout.workout_category === 'Aero 1' ? 'success' :
                 workout.workout_category === 'Vitesse' ? 'danger' :
                 workout.workout_category === 'Technique' ? 'info' :
                 workout.workout_category === 'Récupération' ? 'warning' :
                 'secondary'
-              } mt-1`}>
-                {workout.workout_category}
+              } fs-5 px-3 py-2 me-2`}>
+                {workout.workout_category || "Non catégorisé"}
               </span>
-            )}
+              {workout.workout_level && (
+                <span className={`badge bg-${
+                  workout.workout_level === 'Débutant' ? 'success' :
+                  workout.workout_level === 'Intermédiaire' ? 'warning' :
+                  workout.workout_level === 'Avancé' ? 'danger' :
+                  'secondary'
+                } fs-5 px-3 py-2`}>
+                  {workout.workout_level}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <div>
-          <button 
-            className="btn btn-primary" 
+      </div>
+
+      {/* 3. Description - carte séparée */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">Description</h2>
+            </div>
+            <div className="card-body">
+              {renderDescription(workout.description)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Liste des séries - carte séparée */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">
+                <FaSwimmer className="text-primary me-2" /> 
+                Séries ({workoutSets.length})
+              </h2>
+            </div>
+            <div className="card-body p-0">
+              {workoutSets.length === 0 ? (
+                <div className="p-4 text-center">
+                  <div className="alert alert-info mb-0">
+                    Aucune série associée à cette séance
+                  </div>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th className="text-center">
+                          <FaRedoAlt /> Répétitions
+                        </th>
+                        <th className="text-center">
+                          <FaRulerHorizontal /> Distance
+                        </th>
+                        <th>
+                          <FaDumbbell /> Exercice
+                        </th>
+                        <th className="text-center">
+                          <FaStopwatch /> Repos
+                        </th>
+                        <th className="text-center">
+                          <FaSwimmer /> Total série
+                        </th>
+                        <th className="text-center">
+                          <FaChartLine /> Total cumulé
+                        </th>
+                        <th className="text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {workoutSets.map((set, index) => (
+                        <tr key={set.id}>
+                          <td className="text-center">
+                            <span className="badge bg-primary">
+                              x{set.set_repetition || 1}
+                            </span>
+                          </td>
+                          <td className="text-center">
+                            <span className="badge bg-info text-dark">
+                              {set.set_distance} m
+                            </span>
+                          </td>
+                          <td>
+                            <Link to={`/admin/exercises/${set.exercise_id}`} className="text-decoration-none">
+                              {set.exerciseTitle}
+                            </Link>
+                          </td>
+                          <td className="text-center">
+                            <span className="badge bg-secondary">
+                              {formatRestTime(set.rest_time)}
+                            </span>
+                          </td>
+                          <td className="text-center">
+                            <span className="badge bg-success">
+                              {set.totalDistance} m
+                            </span>
+                          </td>
+                          <td className="text-center fw-bold">
+                            {formatDistance(cumulativeDistances[index])}
+                          </td>
+                          <td className="text-center">
+                            <Link 
+                              to={`/admin/swim-sets/${set.id}`}
+                              className="btn btn-sm btn-outline-primary me-2"
+                            >
+                              Détails
+                            </Link>
+                            <Link 
+                              to={`/admin/swim-sets/${set.id}/edit`}
+                              className="btn btn-sm btn-outline-secondary"
+                            >
+                              <FaEdit />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Informations - carte séparée */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">Informations</h2>
+            </div>
+            <div className="card-body">
+              <ul className="list-unstyled mb-0">
+                <li className="mb-2">
+                  <FaUser className="text-primary me-2" />
+                  Créé par: User #{workout.user_id}
+                </li>
+                <li className="mb-2">
+                  <FaCalendarAlt className="text-primary me-2" />
+                  Créé le: {new Date(workout.created_at).toLocaleDateString()}
+                </li>
+                {workout.updated_at && (
+                  <li>
+                    <FaCalendarAlt className="text-primary me-2" />
+                    Dernière modification: {new Date(workout.updated_at).toLocaleDateString()}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 6. Boutons - séparés sans carte */}
+      <div className="row mb-4">
+        <div className="col-md-4 mb-3 mb-md-0">
+          <button
+            className="btn btn-outline-secondary w-100 py-3"
+            onClick={() => navigate('/admin/workouts')}
+          >
+            <FaArrowLeft className="me-2" /> Liste des Séances
+          </button>
+        </div>
+        <div className="col-md-4 mb-3 mb-md-0">
+          <a
+            href={`http://localhost:3000/user/workouts/${id}`}
+            className="btn btn-outline-primary w-100 py-3"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaExternalLinkAlt className="me-2" /> Vue Par Utilisateur
+          </a>
+        </div>
+        <div className="col-md-4">
+          <button
+            className="btn btn-outline-success w-100 py-3"
             onClick={() => navigate(`/admin/workouts/${id}/edit`)}
           >
-            <FaEdit className="me-2" /> Modifier
+            <FaEdit className="me-2" /> Modifier Cette Séance
           </button>
         </div>
       </div>
 
-      {/* 2. Description */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-header bg-white">
-          <h5 className="mb-0">Description</h5>
-        </div>
-        <div className="card-body">
-          {renderDescription(workout.description)}
-        </div>
-      </div>
-
-      {/* 3. Liste des séries */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">
-            <FaSwimmer className="me-2 text-primary" /> 
-            Séries ({workoutSets.length})
-          </h5>
-          
-        </div>
-        <div className="card-body p-0">
-          {workoutSets.length === 0 ? (
-            <div className="p-4 text-center">
-              <div className="alert alert-info mb-0">
-                Aucune série associée à cette séance
-              </div>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th className="text-center">
-                      <FaRedoAlt /> Répétitions
-                    </th>
-                    <th className="text-center">
-                      <FaRulerHorizontal /> Distance
-                    </th>
-                    <th>
-                      <FaDumbbell /> Exercice
-                    </th>
-                    <th className="text-center">
-                      <FaStopwatch /> Repos
-                    </th>
-                    <th className="text-center">
-                      <FaSwimmer /> Total série
-                    </th>
-                    <th className="text-center">
-                      <FaChartLine /> Total cumulé
-                    </th>
-                    <th className="text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {workoutSets.map((set, index) => (
-                    <tr key={set.id}>
-                      <td className="text-center">
-                        <span className="badge bg-primary">
-                          x{set.set_repetition || 1}
-                        </span>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-info text-dark">
-                          {set.set_distance} m
-                        </span>
-                      </td>
-                      <td>
-                        <Link to={`/admin/exercises/${set.exercise_id}`} className="text-decoration-none">
-                          {set.exerciseTitle}
-                        </Link>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-secondary">
-                          {formatRestTime(set.rest_time)}
-                        </span>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-success">
-                          {set.totalDistance} m
-                        </span>
-                      </td>
-                      <td className="text-center fw-bold">
-                        {formatDistance(cumulativeDistances[index])}
-                      </td>
-                      <td className="text-center">
-                        <Link 
-                          to={`/admin/swim-sets/${set.id}`}
-                          className="btn btn-sm btn-outline-primary me-2"
-                        >
-                          Détails
-                        </Link>
-                        <Link 
-                          to={`/admin/swim-sets/${set.id}/edit`}
-                          className="btn btn-sm btn-outline-secondary"
-                        >
-                          <FaEdit />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 4. Total de la séance */}
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center">
-              <h6 className="card-subtitle mb-2 text-muted">
-                <FaRulerHorizontal className="me-2" /> Distance totale
-              </h6>
-              <p className="card-text h3 text-primary fw-bold">{formatDistance(totalDistance)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center">
-              <h6 className="card-subtitle mb-2 text-muted">
-                <FaClock className="me-2" /> Durée estimée
-              </h6>
-              <p className="card-text h3 text-primary fw-bold">{calculateTotalTime(workoutSets)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center">
-              <h6 className="card-subtitle mb-2 text-muted">
-                <FaDumbbell className="me-2" /> Exercices
-              </h6>
-              <p className="card-text h3 text-primary fw-bold">{workoutExercises.length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Plans et exercices associés */}
+      {/* 7. Plans associés - carte séparée */}
       <div className="row">
-        {/* 5.1 Plans associés */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100">
-            <div className="card-header bg-white">
-              <h5 className="mb-0">
-                <FaCalendarAlt className="me-2 text-primary" /> 
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-header bg-light">
+              <h2 className="h5 mb-0">
+                <FaCalendarAlt className="text-primary me-2" /> 
                 Plans associés ({relatedPlans.length})
-              </h5>
+              </h2>
             </div>
             <div className="card-body">
               {relatedPlans.length === 0 ? (
@@ -428,56 +464,6 @@ const WorkoutDetailPage = () => {
                       <span className="badge bg-primary rounded-pill">
                         {plan.duration || 'N/A'} sem.
                       </span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* 5.2 Exercices associés */}
-        <div className="col-md-6 mb-4">
-          <div className="card h-100">
-            <div className="card-header bg-white d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">
-                <FaDumbbell className="me-2 text-primary" /> 
-                Exercices associés ({workoutExercises.length})
-              </h5>
-
-            </div>
-            <div className="card-body">
-              {workoutExercises.length === 0 ? (
-                <div className="alert alert-info">
-                  Aucun exercice associé à cette séance
-                </div>
-              ) : (
-                <div className="list-group">
-                  {workoutExercises.map(exercise => (
-                    <Link 
-                      key={exercise.id}
-                      to={`/admin/exercises/${exercise.id}`}
-                      className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                    >
-                      <div>
-                        <h6 className="mb-1">{exercise.title}</h6>
-                        <small className="text-muted">
-                          {exercise.exercise_level && (
-                            <span className={`badge bg-${
-                              exercise.exercise_level === 'Débutant' ? 'success' :
-                              exercise.exercise_level === 'Intermédiaire' ? 'warning' :
-                              exercise.exercise_level === 'Avancé' ? 'danger' :
-                              'secondary'
-                            } me-2`}>
-                              {exercise.exercise_level}
-                            </span>
-                          )}
-                          {exercise.exercise_category}
-                        </small>
-                      </div>
-                      <button className="btn btn-sm btn-outline-primary">
-                        Détails
-                      </button>
                     </Link>
                   ))}
                 </div>

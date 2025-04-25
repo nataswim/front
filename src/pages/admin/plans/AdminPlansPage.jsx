@@ -11,14 +11,6 @@ import {
   FaCalendarAlt,
   FaUser,
   FaSwimmer,
-  FaListAlt,
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaSort,
-  FaDumbbell,
-  FaTasks,
-  FaChevronLeft,
-  FaChevronRight,
   FaInfoCircle,
   FaClock,
   FaHistory
@@ -26,6 +18,10 @@ import {
 import { getPlans, deletePlan } from '../../../services/plans';
 import { getWorkoutsForPlan } from '../../../services/planWorkouts';
 
+/**
+ * 🇬🇧 Admin page for plans management
+ * 🇫🇷 Page d'administration pour la gestion des plans
+ */
 const AdminPlansPage = () => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
@@ -37,9 +33,8 @@ const AdminPlansPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [view, setView] = useState('grid'); // 'grid' or 'list'
   const [sortConfig, setSortConfig] = useState({
-    key: 'created_at',  // Par défaut, tri par date de création (le plus récent en premier)
+    key: 'created_at',
     direction: 'desc'
   });
 
@@ -108,38 +103,6 @@ const AdminPlansPage = () => {
     fetchPlans();
   }, []);
 
-  // Request sort
-  const requestSort = (key, direction = null) => {
-    let newDirection = direction;
-    if (!direction) {
-      // If no direction specified, toggle current direction
-      newDirection = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
-    }
-    setSortConfig({ key, direction: newDirection });
-  };
-
-  // Get sort icon
-  const getSortIcon = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === 'asc' ? 
-        <FaSortAmountUp className="ms-1" /> : 
-        <FaSortAmountDown className="ms-1" />;
-    }
-    return <FaSort className="ms-1 text-muted" />;
-  };
-
-  // Strip HTML tags and get plain text
-  const stripHtml = (html) => {
-    if (!html) return '';
-    
-    // Create a temporary element
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    
-    // Return the text content
-    return temp.textContent || temp.innerText || '';
-  };
-
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -163,10 +126,7 @@ const AdminPlansPage = () => {
   const getFilteredAndSortedPlans = () => {
     // First filter plans
     let filteredItems = plans.filter(plan => {
-      const plainTextDescription = stripHtml(plan.description || '');
-      
-      const matchesSearch = plan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           plainTextDescription.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = plan.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || plan.plan_category === categoryFilter;
       return matchesSearch && matchesCategory;
     });
@@ -244,21 +204,180 @@ const AdminPlansPage = () => {
     }
   };
 
-  // Limit description length
-  const truncateDescription = (description, maxLength = 100) => {
-    if (!description) return "Aucune description disponible";
+  // Render pagination
+  const renderPagination = () => {
+    if (sortedFilteredPlans.length <= itemsPerPage) return null;
     
-    // Strip HTML tags and truncate
-    const plainText = stripHtml(description);
-    
-    if (plainText.length <= maxLength) return plainText;
-    
-    return plainText.substring(0, maxLength) + '...';
+    return (
+      <div className="card mt-4">
+        <div className="card-body d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center">
+            <span className="me-2">Afficher</span>
+            <select 
+              className="form-select form-select-sm" 
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(0);
+              }}
+              style={{width: '70px'}}
+            >
+              <option value="8">8</option>
+              <option value="12">12</option>
+              <option value="20">20</option>
+              <option value="40">40</option>
+            </select>
+            <span className="ms-2">par page</span>
+          </div>
+          
+          <nav aria-label="Navigation des pages">
+            <ul className="pagination pagination-sm mb-0">
+              <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
+                <button 
+                  type="button"
+                  className="page-link" 
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 0}
+                >
+                  &laquo;
+                </button>
+              </li>
+              
+              {[...Array(pageCount)].map((_, index) => (
+                <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
+                  <button
+                    type="button"
+                    className="page-link"
+                    onClick={() => setCurrentPage(index)}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              
+              <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                <button 
+                  type="button"
+                  className="page-link" 
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === pageCount - 1}
+                >
+                  &raquo;
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    );
   };
 
-  // Render grid view
-  const renderGridView = () => {
+  if (loading) {
     return (
+      <div className="container py-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Chargement...</span>
+          </div>
+          <p className="mt-3">Chargement des plans...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container-fluid py-4">
+      {/* Titre Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaCalendarAlt className="me-2" />
+                Gestion des Plans
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <p className="text-muted mb-0">
+            {plans.length} plan{plans.length > 1 ? 's' : ''} au total
+            {sortedFilteredPlans.length !== plans.length && ` (${sortedFilteredPlans.length} filtrés)`}
+          </p>
+        </div>
+        <button 
+          className="btn btn-success btn-lg d-flex align-items-center"
+          onClick={() => navigate('/admin/plans/new')}
+        >
+          <FaPlus className="me-2" /> Ajouter Un Plan
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-body">
+          <div className="row g-3">
+            <div className="col-md-6">
+              <div className="input-group">
+                <span className="input-group-text bg-light">
+                  <FaSearch />
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Rechercher un plan..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(0); // Reset to first page on search
+                  }}
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="d-flex gap-2">
+                <div className="input-group">
+                  <span className="input-group-text bg-light">
+                    <FaFilter />
+                  </span>
+                  <select
+                    className="form-select"
+                    value={categoryFilter}
+                    onChange={(e) => {
+                      setCategoryFilter(e.target.value);
+                      setCurrentPage(0); // Reset to first page on filter change
+                    }}
+                  >
+                    <option value="all">Toutes les catégories</option>
+                    {planCategories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+                <button 
+                  className="btn btn-outline-secondary" 
+                  onClick={fetchPlans}
+                  title="Rafraîchir"
+                >
+                  <FaSync />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          <FaInfoCircle className="me-2" />
+          {error}
+        </div>
+      )}
+
+      {/* Plans Grid */}
       <div className="row g-4">
         {currentPlans.length === 0 ? (
           <div className="col-12">
@@ -292,10 +411,6 @@ const AdminPlansPage = () => {
                     <h2 className="h5 card-title mb-0">{plan.title}</h2>
                   </div>
 
-                  <p className="card-text text-muted small mb-3">
-                    {truncateDescription(plan.description, 120)}
-                  </p>
-
                   <div className="d-flex align-items-center text-muted small mb-3">
                     <FaUser className="me-2" />
                     Créé par: User #{plan.user_id}
@@ -324,25 +439,6 @@ const AdminPlansPage = () => {
                       </div>
                     )}
                   </div>
-
-                  {!loadingWorkouts && planWorkouts[plan.id]?.length > 0 && (
-                    <div className="small">
-                      <div className="fw-semibold mb-2">Séances incluses:</div>
-                      <ul className="list-unstyled mb-0">
-                        {planWorkouts[plan.id].slice(0, 3).map((workout) => (
-                          <li key={workout.id} className="mb-1">
-                            <FaListAlt className="text-primary me-2" />
-                            {workout.title.length > 25 ? workout.title.substring(0, 25) + '...' : workout.title}
-                          </li>
-                        ))}
-                        {planWorkouts[plan.id].length > 3 && (
-                          <li className="text-primary">
-                            + {planWorkouts[plan.id].length - 3} autre{planWorkouts[plan.id].length - 3 > 1 ? 's' : ''}
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
                 </div>
                 <div className="card-footer bg-white">
                   <div className="d-flex justify-content-between">
@@ -376,383 +472,6 @@ const AdminPlansPage = () => {
           ))
         )}
       </div>
-    );
-  };
-
-  // Render list view
-  const renderListView = () => {
-    return (
-      <div className="card shadow-sm">
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-light">
-                <tr>
-                  <th 
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('id')}
-                  >
-                    ID {getSortIcon('id')}
-                  </th>
-                  <th 
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('title')}
-                  >
-                    Titre {getSortIcon('title')}
-                  </th>
-                  <th 
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('plan_category')}
-                  >
-                    Catégorie {getSortIcon('plan_category')}
-                  </th>
-                  <th 
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('workoutCount')}
-                  >
-                    Séances {getSortIcon('workoutCount')}
-                  </th>
-                  <th
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('created_at')}
-                  >
-                    Créé {getSortIcon('created_at')}
-                  </th>
-                  <th
-                    className="cursor-pointer"
-                    style={{cursor: 'pointer'}}
-                    onClick={() => requestSort('updated_at')}
-                  >
-                    Modifié {getSortIcon('updated_at')}
-                  </th>
-                  <th>Description</th>
-                  <th className="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPlans.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="text-center py-4">
-                      Aucun plan ne correspond à vos critères de recherche.
-                    </td>
-                  </tr>
-                ) : (
-                  currentPlans.map((plan) => (
-                    <tr key={plan.id}>
-                      <td>{plan.id}</td>
-                      <td>
-                        <span className="fw-medium">{plan.title}</span>
-                      </td>
-                      <td>
-                        <span className={`badge bg-${getCategoryBadgeColor(plan.plan_category)}`}>
-                          {plan.plan_category || 'Non catégorisé'}
-                        </span>
-                      </td>
-                      <td>
-                        {loadingWorkouts ? (
-                          <div className="spinner-border spinner-border-sm text-primary" role="status">
-                            <span className="visually-hidden">Chargement...</span>
-                          </div>
-                        ) : (
-                          <div className="d-flex align-items-center">
-                            <FaDumbbell className="me-1 text-primary" />
-                            <span className="badge bg-primary rounded-pill">
-                              {planWorkouts[plan.id]?.length || 0}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <small className="text-muted">
-                          {formatDate(plan.created_at)}
-                        </small>
-                      </td>
-                      <td>
-                        <small className="text-muted">
-                          {formatDate(plan.updated_at)}
-                        </small>
-                      </td>
-                      <td>
-                        <div className="text-truncate" style={{maxWidth: '200px'}}>
-                          {truncateDescription(plan.description, 50)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex justify-content-center gap-1">
-                          <button 
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => navigate(`/admin/plans/${plan.id}`)}
-                            title="Voir détails"
-                          >
-                            <FaEye />
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => navigate(`/admin/plans/${plan.id}/edit`)}
-                            title="Modifier"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDelete(plan.id, plan.title)}
-                            title="Supprimer"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render pagination
-  const renderPagination = () => {
-    if (sortedFilteredPlans.length <= itemsPerPage) return null;
-    
-    return (
-      <div className="card mt-4">
-        <div className="card-body d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <span className="me-2">Afficher</span>
-            <select 
-              className="form-select form-select-sm" 
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(0);
-              }}
-              style={{width: '70px'}}
-            >
-              <option value="8">8</option>
-              <option value="12">12</option>
-              <option value="20">20</option>
-              <option value="40">40</option>
-            </select>
-            <span className="ms-2">par page</span>
-          </div>
-          
-          <div className="d-none d-md-flex">
-            <nav aria-label="Navigation des pages">
-              <ul className="pagination pagination-sm mb-0">
-                <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
-                  <button 
-                    type="button"
-                    className="page-link" 
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 0}
-                  >
-                    &laquo;
-                  </button>
-                </li>
-                
-                {[...Array(pageCount)].map((_, index) => (
-                  <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
-                    <button
-                      type="button"
-                      className="page-link"
-                      onClick={() => setCurrentPage(index)}
-                    >
-                      {index + 1}
-                    </button>
-                  </li>
-                ))}
-                
-                <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
-                  <button 
-                    type="button"
-                    className="page-link" 
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === pageCount - 1}
-                  >
-                    &raquo;
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-          
-          <div className="d-flex d-md-none">
-            <div className="btn-group">
-              <button 
-                type="button"
-                className="btn btn-sm btn-outline-secondary" 
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 0}
-              >
-                <FaChevronLeft />
-              </button>
-              
-              <button type="button" className="btn btn-sm btn-outline-secondary" disabled>
-                {currentPage + 1} / {pageCount}
-              </button>
-              
-              <button 
-                type="button"
-                className="btn btn-sm btn-outline-secondary" 
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === pageCount - 1}
-              >
-                <FaChevronRight />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  if (loading) {
-    return (
-      <div className="container py-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Chargement...</span>
-          </div>
-          <p className="mt-3">Chargement des plans...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="h2 mb-0">Gestion des Plans</h1>
-          <p className="text-muted mb-0">
-            {plans.length} plan{plans.length > 1 ? 's' : ''} au total
-            {sortedFilteredPlans.length !== plans.length && ` (${sortedFilteredPlans.length} filtrés)`}
-          </p>
-        </div>
-        <div className="d-flex gap-2">
-          <div className="btn-group">
-            <button 
-              type="button"
-              className={`btn btn-sm ${view === 'grid' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setView('grid')}
-              title="Vue en grille"
-            >
-              <FaTasks className={view === 'grid' ? 'text-white' : ''} />
-            </button>
-            <button 
-              type="button"
-              className={`btn btn-sm ${view === 'list' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setView('list')}
-              title="Vue en liste"
-            >
-              <FaListAlt className={view === 'list' ? 'text-white' : ''} />
-            </button>
-          </div>
-          <button 
-            className="btn btn-primary d-flex align-items-center"
-            onClick={() => navigate('/admin/plans/new')}
-          >
-            <FaPlus className="me-2" /> Nouveau plan
-          </button>
-        </div>
-      </div>
-
-      {/* Filters and Sorting */}
-      <div className="card shadow-sm mb-4">
-        <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-4">
-              <div className="input-group">
-                <span className="input-group-text bg-light">
-                  <FaSearch />
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Rechercher un plan..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(0); // Reset to first page on search
-                  }}
-                />
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="input-group">
-                <span className="input-group-text bg-light">
-                  <FaFilter />
-                </span>
-                <select
-                  className="form-select"
-                  value={categoryFilter}
-                  onChange={(e) => {
-                    setCategoryFilter(e.target.value);
-                    setCurrentPage(0); // Reset to first page on filter change
-                  }}
-                >
-                  <option value="all">Toutes les catégories</option>
-                  {planCategories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="input-group">
-                <span className="input-group-text bg-light">
-                  <FaSort />
-                </span>
-                <select
-                  className="form-select"
-                  value={`${sortConfig.key}-${sortConfig.direction}`}
-                  onChange={(e) => {
-                    const [key, direction] = e.target.value.split('-');
-                    setSortConfig({ key, direction });
-                    setCurrentPage(0); // Reset to first page on sort change
-                  }}
-                >
-                  <option value="created_at-desc">Le plus récent en premier</option>
-                  <option value="updated_at-desc">Dernière modification en premier</option>
-                  <option value="created_at-asc">Le plus ancien en premier</option>
-                  <option value="title-asc">Titre (A-Z)</option>
-                  <option value="title-desc">Titre (Z-A)</option>
-                  <option value="workoutCount-desc">Plus de séances</option>
-                  <option value="workoutCount-asc">Moins de séances</option>
-                </select>
-              </div>
-            </div>
-            <div className="col-md-1">
-              <button 
-                type="button"
-                className="btn btn-outline-secondary w-100" 
-                onClick={fetchPlans}
-                title="Rafraîchir"
-              >
-                <FaSync />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          <FaInfoCircle className="me-2" />
-          {error}
-        </div>
-      )}
-
-      {/* Plans List or Grid */}
-      {view === 'grid' ? renderGridView() : renderListView()}
 
       {/* Pagination */}
       {renderPagination()}

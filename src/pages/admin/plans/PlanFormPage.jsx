@@ -17,14 +17,23 @@ import {
   FaFilter,
   FaRulerHorizontal,
   FaLayerGroup,
-  FaInfoCircle
+  FaInfoCircle,
+  FaLink,
+  FaUnlink,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 import { getPlan, createPlan, updatePlan } from '../../../services/plans';
 import { getWorkoutsForPlan, addWorkoutToPlan, removeWorkoutFromPlan } from '../../../services/planWorkouts';
+import { getUsers } from '../../../services/users';
 import TextEditor from '../../../components/ui/forms/TextEditor';
 import "quill/dist/quill.snow.css"; // Import du CSS pour TextEditor
 import axios from 'axios';
 
+/**
+ * 🇬🇧 Component for creating and editing training plans
+ * 🇫🇷 Composant pour créer et modifier des plans d'entraînement
+ */
 const PlanFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,7 +58,7 @@ const PlanFormPage = () => {
     direction: 'asc'
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Augmenté à 10 comme dans WorkoutFormPage
 
   // Status states
   const [loading, setLoading] = useState(false);
@@ -104,10 +113,10 @@ const PlanFormPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         // Fetch users
-        const usersResponse = await fetch('http://127.0.0.1:8000/api/users');
-        const usersData = await usersResponse.json();
-        setUsers(usersData);
+        const usersResponse = await getUsers();
+        setUsers(usersResponse.data);
         
         // Fetch all workouts
         setWorkoutsLoading(true);
@@ -147,9 +156,12 @@ const PlanFormPage = () => {
         
         setAllWorkouts(workoutsWithStats);
         setWorkoutsLoading(false);
+        setLoading(false);
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);
+        setError("Erreur lors du chargement des données.");
         setWorkoutsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -162,6 +174,14 @@ const PlanFormPage = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // Handle description text editor changes
+  const handleDescriptionChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      description: value
     }));
   };
 
@@ -182,6 +202,20 @@ const PlanFormPage = () => {
         return [...prev, workoutId];
       }
     });
+  };
+
+  // Handle workout association
+  const handleWorkoutAssociate = (workoutId) => {
+    if (!selectedWorkouts.includes(workoutId)) {
+      setSelectedWorkouts(prev => [...prev, workoutId]);
+    }
+  };
+
+  // Handle workout removal
+  const handleWorkoutRemove = (workoutId) => {
+    if (selectedWorkouts.includes(workoutId)) {
+      setSelectedWorkouts(prev => prev.filter(id => id !== workoutId));
+    }
   };
 
   // Sort and filter workouts
@@ -217,10 +251,7 @@ const PlanFormPage = () => {
   const indexOfFirstWorkout = indexOfLastWorkout - itemsPerPage;
   const currentWorkouts = sortedFilteredWorkouts.slice(indexOfFirstWorkout, indexOfLastWorkout);
 
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Handle sort request
+  // Request sort
   const requestSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -230,11 +261,11 @@ const PlanFormPage = () => {
   };
 
   // Get sort direction icon
-  const getSortIcon = (key) => {
+  const getSortDirectionIcon = (key) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
     }
-    return <FaSort className="text-muted" />;
+    return <FaSort />;
   };
 
   // Format distance
@@ -243,6 +274,43 @@ const PlanFormPage = () => {
       return `${(meters / 1000).toFixed(1)} km`;
     }
     return `${meters} m`;
+  };
+
+  // Render pagination controls
+  const renderPagination = () => {
+    if (pageCount <= 1) return null;
+
+    const handlePageChange = (e, newPage) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentPage(newPage);
+    };
+
+    return (
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <button 
+          className="btn btn-sm btn-outline-secondary" 
+          onClick={(e) => handlePageChange(e, currentPage - 1)}
+          disabled={currentPage === 1}
+          type="button"
+        >
+          <FaChevronLeft /> Précédent
+        </button>
+        
+        <div className="px-2">
+          Page {currentPage} sur {pageCount}
+        </div>
+        
+        <button 
+          className="btn btn-sm btn-outline-secondary" 
+          onClick={(e) => handlePageChange(e, currentPage + 1)}
+          disabled={currentPage === pageCount}
+          type="button"
+        >
+          Suivant <FaChevronRight />
+        </button>
+      </div>
+    );
   };
 
   // Handle form submission
@@ -330,12 +398,28 @@ const PlanFormPage = () => {
 
   return (
     <div className="container py-4">
+      {/* Titre Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaPlus className="me-2" />
+                {isEditMode ? "Modification d'un Plan" : "Création d'un Plan"}
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br />
+      
       <button 
-        className="btn btn-outline-primary mb-4" 
+        className="btn btn-success btn-lg d-flex align-items-center" 
         onClick={() => navigate('/admin/plans')}
       >
         <FaArrowLeft className="me-2" /> Retour à la liste
       </button>
+      <br />
 
       <div className="card shadow mb-4">
         <div className="card-header bg-white">
@@ -377,7 +461,7 @@ const PlanFormPage = () => {
                 <label className="form-label">Description</label>
                 <TextEditor 
                   value={formData.description} 
-                  onChange={(value) => setFormData(prev => ({ ...prev, description: value }))} 
+                  onChange={handleDescriptionChange}
                 />
               </div>
 
@@ -417,7 +501,7 @@ const PlanFormPage = () => {
               </div>
 
               {/* Séances d'entraînement */}
-              <div className="card mt-4 mb-4">
+              <div className="card mb-4">
                 <div className="card-header bg-white">
                   <div className="d-flex justify-content-between align-items-center">
                     <h6 className="mb-0">
@@ -430,26 +514,26 @@ const PlanFormPage = () => {
                   </div>
                 </div>
                 <div className="card-body">
-                  <div className="mb-3">
-                    <div className="row">
-                      <div className="col-md-6 mb-2 mb-md-0">
-                        <div className="input-group">
-                          <span className="input-group-text bg-light">
-                            <FaSearch />
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Rechercher une séance..."
-                            value={workoutSearchTerm}
-                            onChange={(e) => {
-                              setWorkoutSearchTerm(e.target.value);
-                              setCurrentPage(1); // Reset to first page on search
-                            }}
-                          />
-                        </div>
+                  <div className="row mb-3 align-items-center">
+                    <div className="col-md-6">
+                      <div className="input-group">
+                        <span className="input-group-text bg-light">
+                          <FaSearch />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Rechercher une séance..."
+                          value={workoutSearchTerm}
+                          onChange={(e) => {
+                            setWorkoutSearchTerm(e.target.value);
+                            setCurrentPage(1); // Reset to first page on search
+                          }}
+                        />
                       </div>
-                      <div className="col-md-6">
+                    </div>
+                    <div className="col-md-6">
+                      <div className="d-flex gap-2">
                         <div className="input-group">
                           <span className="input-group-text bg-light">
                             <FaFilter />
@@ -471,22 +555,6 @@ const PlanFormPage = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Selected workouts summary */}
-                  {selectedWorkouts.length > 0 && (
-                    <div className="alert alert-success mb-3">
-                      <FaRegCheckSquare className="me-2" />
-                      {selectedWorkouts.length} {selectedWorkouts.length === 1 ? 'séance sélectionnée' : 'séances sélectionnées'}
-                      {/* Button to deselect all workouts */}
-                      <button 
-                        type="button"
-                        className="btn btn-sm btn-outline-secondary float-end"
-                        onClick={() => setSelectedWorkouts([])}
-                      >
-                        Tout désélectionner
-                      </button>
-                    </div>
-                  )}
 
                   {workoutsLoading ? (
                     <div className="text-center py-4">
@@ -516,6 +584,22 @@ const PlanFormPage = () => {
                     </div>
                   ) : (
                     <>
+                      {/* Selected workouts summary */}
+                      {selectedWorkouts.length > 0 && (
+                        <div className="alert alert-success mb-3">
+                          <FaRegCheckSquare className="me-2" />
+                          {selectedWorkouts.length} {selectedWorkouts.length === 1 ? 'séance sélectionnée' : 'séances sélectionnées'}
+                          {/* Button to deselect all workouts */}
+                          <button 
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary float-end"
+                            onClick={() => setSelectedWorkouts([])}
+                          >
+                            Tout désélectionner
+                          </button>
+                        </div>
+                      )}
+
                       <div className="table-responsive">
                         <table className="table table-hover">
                           <thead className="table-light">
@@ -523,49 +607,24 @@ const PlanFormPage = () => {
                               <th style={{width: "50px"}}></th>
                               <th 
                                 style={{cursor: 'pointer'}}
-                                onClick={() => requestSort('id')}
-                                className="d-flex align-items-center"
-                              >
-                                ID {getSortIcon('id')}
-                              </th>
-                              <th 
-                                style={{cursor: 'pointer'}}
                                 onClick={() => requestSort('title')}
                                 className="d-flex align-items-center"
                               >
-                                Titre {getSortIcon('title')}
+                                Titre {getSortDirectionIcon('title')}
                               </th>
                               <th 
                                 style={{cursor: 'pointer'}}
                                 onClick={() => requestSort('workout_category')}
                               >
-                                Catégorie {getSortIcon('workout_category')}
+                                Catégorie {getSortDirectionIcon('workout_category')}
                               </th>
-                              <th 
-                                className="text-center"
-                                style={{cursor: 'pointer'}}
-                                onClick={() => requestSort('totalDistance')}
-                              >
-                                <FaRulerHorizontal className="me-1" />
-                                Distance {getSortIcon('totalDistance')}
-                              </th>
-                              <th 
-                                className="text-center"
-                                style={{cursor: 'pointer'}}
-                                onClick={() => requestSort('setsCount')}
-                              >
-                                <FaLayerGroup className="me-1" />
-                                Séries {getSortIcon('setsCount')}
-                              </th>
-                              <th className="text-center">Aperçu</th>
+                              <th style={{width: "150px"}} className="text-center">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {currentWorkouts.map((workout) => (
                               <tr 
                                 key={workout.id}
-                                onClick={() => handleWorkoutToggle(workout.id)}
-                                style={{cursor: 'pointer'}}
                                 className={selectedWorkouts.includes(workout.id) ? 'table-primary' : ''}
                               >
                                 <td className="text-center">
@@ -575,7 +634,6 @@ const PlanFormPage = () => {
                                     <FaRegSquare className="text-muted" />
                                   )}
                                 </td>
-                                <td>{workout.id}</td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     <FaSwimmer className="text-primary me-2" />
@@ -597,27 +655,34 @@ const PlanFormPage = () => {
                                   )}
                                 </td>
                                 <td className="text-center">
-                                  <span className="badge bg-info text-dark">
-                                    {formatDistance(workout.totalDistance)}
-                                  </span>
-                                </td>
-                                <td className="text-center">
-                                  <span className="badge bg-secondary">
-                                    {workout.setsCount}
-                                  </span>
-                                </td>
-                                <td className="text-center">
-                                  <button
-                                    type="button"
-                                    className="btn btn-sm btn-outline-primary"
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // Prevent row click
-                                      navigate(`/admin/workouts/${workout.id}`);
-                                    }}
-                                    title="Voir détails"
-                                  >
-                                    <FaEye />
-                                  </button>
+                                  <div className="btn-group btn-group-sm">
+                                    <button 
+                                      type="button"
+                                      className="btn btn-outline-success"
+                                      onClick={() => handleWorkoutAssociate(workout.id)}
+                                      disabled={selectedWorkouts.includes(workout.id)}
+                                      title="Associer cette séance"
+                                    >
+                                      <FaLink />
+                                    </button>
+                                    <button 
+                                      type="button"
+                                      className="btn btn-outline-danger"
+                                      onClick={() => handleWorkoutRemove(workout.id)}
+                                      disabled={!selectedWorkouts.includes(workout.id)}
+                                      title="Enlever cette séance"
+                                    >
+                                      <FaUnlink />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn-outline-primary"
+                                      onClick={() => navigate(`/admin/workouts/${workout.id}`)}
+                                      title="Voir détails"
+                                    >
+                                      <FaEye />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -626,64 +691,24 @@ const PlanFormPage = () => {
                       </div>
 
                       {/* Pagination */}
-                      {pageCount > 1 && (
-                        <div className="d-flex justify-content-center mt-3">
-                          <nav>
-                            <ul className="pagination pagination-sm">
-                              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button 
-                                  type="button"
-                                  className="page-link" 
-                                  onClick={() => paginate(currentPage - 1)}
-                                  disabled={currentPage === 1}
-                                >
-                                  &laquo;
-                                </button>
-                              </li>
-                              
-                              {Array.from({ length: pageCount }, (_, i) => i + 1).map(number => (
-                                <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                                  <button
-                                    type="button"
-                                    className="page-link"
-                                    onClick={() => paginate(number)}
-                                  >
-                                    {number}
-                                  </button>
-                                </li>
-                              ))}
-                              
-                              <li className={`page-item ${currentPage === pageCount ? 'disabled' : ''}`}>
-                                <button 
-                                  type="button"
-                                  className="page-link" 
-                                  onClick={() => paginate(currentPage + 1)}
-                                  disabled={currentPage === pageCount}
-                                >
-                                  &raquo;
-                                </button>
-                              </li>
-                            </ul>
-                          </nav>
-                        </div>
-                      )}
+                      {renderPagination()}
 
                       {/* Items per page selector */}
-                      <div className="d-flex justify-content-center align-items-center mt-2">
+                      <div className="d-flex justify-content-center align-items-center mt-3">
                         <span className="me-2">Afficher</span>
                         <select 
                           className="form-select form-select-sm" 
-                          style={{width: '60px'}} 
+                          style={{width: '70px'}} 
                           value={itemsPerPage}
                           onChange={(e) => {
                             setItemsPerPage(Number(e.target.value));
                             setCurrentPage(1); // Reset to first page
                           }}
                         >
-                          <option value="5">5</option>
                           <option value="10">10</option>
                           <option value="15">15</option>
                           <option value="20">20</option>
+                          <option value="25">25</option>
                         </select>
                         <span className="ms-2">par page</span>
                       </div>
@@ -695,7 +720,7 @@ const PlanFormPage = () => {
               <div className="text-end">
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn btn-danger btn-lg d-flex align-items-center"
                   disabled={saving}
                 >
                   {saving ? (
@@ -705,7 +730,7 @@ const PlanFormPage = () => {
                     </>
                   ) : (
                     <>
-                      <FaSave className="me-2" /> Enregistrer
+                      <FaSave className="me-2" /> Enregistrer Ce Plan
                     </>
                   )}
                 </button>

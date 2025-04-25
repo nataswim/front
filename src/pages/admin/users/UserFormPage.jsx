@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUser, createUser, updateUser } from '../../../services/users';
-import { FaArrowLeft, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaPlus, FaEye, FaUsers } from 'react-icons/fa';
 import { getRoles } from '../../../services/roles';
+
 
 const UserFormPage = () => {
   const { id } = useParams();
@@ -132,159 +133,175 @@ const UserFormPage = () => {
   };
 
   return (
-    <div className="container py-4">
-      <div className="d-flex justify-content-between mb-4">
-        <button 
-          className="btn btn-outline-primary" 
-          onClick={() => navigate('/admin/users')}
-        >
-          <FaArrowLeft className="me-2" /> Retour à la liste
-        </button>
-        
-        {/* Bouton de réinitialisation du formulaire */}
-        {!isEditMode && (
-          <button 
-            className="btn btn-outline-secondary" 
-            onClick={resetForm}
-            type="button"
-          >
-            Réinitialiser le formulaire
-          </button>
-        )}
-      </div>
 
-      <div className="card shadow mx-auto" style={{ maxWidth: '800px' }}>
-        <div className="card-header bg-white">
-          <h5 className="card-title mb-0">{isEditMode ? 'Modifier un utilisateur' : 'Ajouter un utilisateur'}</h5>
-          <p className="card-text text-muted small">
-            {isEditMode 
-              ? 'Modifiez les informations de l\'utilisateur' 
-              : 'Créez un nouvel utilisateur dans le système'}
-          </p>
-        </div>
 
-        <div className="card-body">
-          {error && (
-            <div className="alert alert-danger mb-4" role="alert">
-              {error}
+ <><div className="container-fluid py-4">
+
+      {/* Titre Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-primary-subtle">
+              <h2 className="card-title mb-0">
+                <FaUsers className="me-2" />
+                Membres Utilisateurs
+              </h2>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="username" className="form-label">Nom d'utilisateur</label>
-              <input
-                type="text"
-                className="form-control"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="username"
-                required
-              />
-            </div>
-
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label htmlFor="first_name" className="form-label">Prénom</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="first_name"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  placeholder="Prénom"
-                />
-              </div>
-
-              <div className="col-md-6">
-                <label htmlFor="last_name" className="form-label">Nom</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="last_name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  placeholder="Nom"
-                />
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="email@example.com"
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                {isEditMode ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required={!isEditMode}
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="role_id" className="form-label">Rôle</label>
-              <select
-                className="form-select"
-                id="role_id"
-                name="role_id"
-                value={formData.role_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Sélectionner un rôle</option>
-                {roles.map((role) => (
-                  <option key={role.id} value={role.id.toString()}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="d-grid">
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                disabled={loading}
-              >
-                {loading ? (
-                  <span>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Enregistrement...
-                  </span>
-                ) : (
-                  <span>
-                    <FaSave className="me-2" />
-                    {isEditMode ? 'Mettre à jour' : 'Créer l\'utilisateur'}
-                  </span>
-                )}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
+    
+    <div className="container py-4">
+
+
+        <div className="d-flex justify-content-between mb-4">
+          <button
+            className="btn btn-success btn-lg d-flex align-items-center"
+            onClick={() => navigate('/admin/users')}
+          >
+            <FaArrowLeft className="me-2" /> Retour à la liste
+          </button>
+
+          {/* Bouton de réinitialisation du formulaire */}
+          {!isEditMode && (
+            <button
+              className="btn btn-success btn-lg d-flex align-items-center"
+              onClick={resetForm}
+              type="button"
+            >
+             <FaEye className="me-2" /> Réinitialiser le formulaire
+            </button>
+          )}
+        </div>
+
+        <div className="card shadow mx-auto" style={{ maxWidth: '800px' }}>
+          <div className="card-header bg-white">
+            <h5 className="card-title mb-0">{isEditMode ? 'Modifier un utilisateur' : 'Nouveau'}</h5>
+            <p className="card-text text-muted small">
+              {isEditMode
+                ? 'Modifiez les informations de l\'utilisateur'
+                : 'Créez un nouveau compte utilisateur '}
+            </p>
+          </div>
+
+          <div className="card-body">
+            {error && (
+              <div className="alert alert-danger mb-4" role="alert">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">Nom d'utilisateur</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="username"
+                  required />
+              </div>
+
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <label htmlFor="first_name" className="form-label">Prénom</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    placeholder="Prénom" />
+                </div>
+
+                <div className="col-md-6">
+                  <label htmlFor="last_name" className="form-label">Nom</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    placeholder="Nom" />
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="email@example.com"
+                  required />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">
+                  {isEditMode ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  required={!isEditMode} />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="role_id" className="form-label">Rôle</label>
+                <select
+                  className="form-select"
+                  id="role_id"
+                  name="role_id"
+                  value={formData.role_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Sélectionner un rôle</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id.toString()}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="d-grid">
+                <button
+                  type="submit"
+                  className="btn btn-danger btn-lg"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Enregistrement...
+                    </span>
+                  ) : (
+                    <span>
+                      <FaSave className="me-2" />
+                      {isEditMode ? 'Mettre à jour' : 'Créer l\'utilisateur'}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div></>
   );
 };
 

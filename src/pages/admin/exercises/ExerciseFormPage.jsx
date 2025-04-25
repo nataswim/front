@@ -11,6 +11,7 @@ import {
   FaSearch,
   FaChevronLeft,
   FaChevronRight,
+  FaDumbbell,
   FaSortAmountDownAlt
 } from 'react-icons/fa';
 import { getExercise, createExercise, updateExercise } from '../../../services/exercises';
@@ -399,17 +400,31 @@ const ExerciseFormPage = () => {
 
   return (
     <div className="container py-4">
+      {/* Titre Section */}
+               <div className="row mb-4">
+                       <div className="col-12">
+                         <div className="card border-0 shadow-sm">
+                           <div className="card-header bg-primary-subtle">
+                             <h2 className="card-title mb-0">
+                               <FaDumbbell className="me-2" />
+                               Créer un nouvel exercice
+                             </h2>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <br></br>
       <button 
-        className="btn btn-outline-primary mb-4" 
+        className="btn btn-success btn-lg d-flex align-items-center" 
         onClick={() => navigate('/admin/exercises')}
       >
-        <FaArrowLeft className="me-2" /> Retour à la liste
+        <FaArrowLeft className="me-2" /> Retour à la liste Des Exercices
       </button>
-
+<br></br>
       <div className="card shadow">
         <div className="card-header bg-white">
           <h5 className="card-title mb-0">
-            {isEditMode ? "Modifier l'exercice" : "Créer un nouvel exercice"}
+            {isEditMode ? "Modifier l'exercice" : "Nouveau exercice"}
           </h5>
         </div>
 

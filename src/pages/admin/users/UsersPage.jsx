@@ -10,12 +10,12 @@ import {
   FaUser,
   FaEnvelope,
   FaShieldAlt,
-  FaCalendarAlt,
+  FaGoogle,
   FaSort,
   FaSortUp,
   FaSortDown,
   FaEye,
-  FaGoogle,
+  FaUsers,
   FaExternalLinkAlt
 } from 'react-icons/fa';
 import { getUsers, deleteUser } from '../../../services/users';
@@ -187,18 +187,33 @@ const UsersPage = () => {
 
   return (
     <div className="container-fluid py-4">
+
+  {/* Titre Section */}
+       <div className="row mb-4">
+         <div className="col-12">
+           <div className="card border-0 shadow-sm">
+             <div className="card-header bg-primary-subtle">
+               <h2 className="card-title mb-0">
+                 <FaUsers className="me-2" />
+                 Liste des Utilisateurs
+               </h2>
+             </div>
+           </div>
+         </div>
+       </div>
+     
+
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="h2 mb-0">Gestion des Utilisateurs</h1>
           <p className="text-muted mb-0">
             {users.length} utilisateur{users.length > 1 ? 's' : ''} au total | {filteredAndSortedUsers.length} affiché{filteredAndSortedUsers.length > 1 ? 's' : ''}
           </p>
         </div>
         <button 
-          className="btn btn-primary d-flex align-items-center"
+          className="btn btn-success btn-lg d-flex align-items-center"
           onClick={() => navigate('/admin/users/new')}
         >
-          <FaPlus className="me-2" /> Nouvel utilisateur
+          <FaPlus className="me-2" /> Ajouter Un Utilisateur
         </button>
       </div>
 
