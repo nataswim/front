@@ -8,7 +8,8 @@ import {
   FaTrash 
 } from 'react-icons/fa';
 import { getPage, createPage, updatePage } from '../../../services/pages';
-import { getUpload, createUpload } from '../../../services/uploads';
+import { getUpload, createUpload, getUploads } from '../../../services/uploads';
+import { getUsers } from '../../../services/users';
 
 import "quill/dist/quill.snow.css"; // Import du CSS
 import TextEditor from "../../../components/ui/forms/TextEditor";
@@ -38,11 +39,18 @@ const PageFormPage = () => {
   const [error, setError] = useState(null);
   const [uploads, setUploads] = useState([]);
   const [users, setUsers] = useState([]);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const imagesPerPage = 12;
 
   // Page categories
   const pageCategories = ['Information', 'Conseils', 'Règles', 'Foire aux questions'];
 
-  // Load page data if in edit mode
+  /**
+   * 🇬🇧 Load page data if in edit mode
+   * 🇫🇷 Charger les données de la page si en mode édition
+   */
   useEffect(() => {
     const fetchPage = async () => {
       if (isEditMode) {
@@ -81,43 +89,68 @@ const PageFormPage = () => {
     fetchPage();
   }, [id, isEditMode]);
 
-  // Load uploads and users
+  /**
+   * 🇬🇧 Load uploads and users
+   * 🇫🇷 Charger les uploads et les utilisateurs
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        console.log('Chargement des données...');
+        
+        // Utiliser les services pour récupérer les données
         const [uploadsResponse, usersResponse] = await Promise.all([
-          fetch('http://127.0.0.1:8000/api/uploads'),
-          fetch('http://127.0.0.1:8000/api/users')
+          getUploads(),
+          getUsers()
         ]);
 
-        const uploadsData = await uploadsResponse.json();
-        const usersData = await usersResponse.json();
+        console.log('Données uploads:', uploadsResponse.data);
+        console.log('Données users:', usersResponse.data);
+
+        // Vérifier que les données sont un tableau
+        const uploadsData = Array.isArray(uploadsResponse.data) ? uploadsResponse.data : [];
+        const usersData = Array.isArray(usersResponse.data) ? usersResponse.data : [];
 
         // Trier les uploads par nom de fichier
-        const sortedUploads = uploadsData.sort((a, b) => 
-          a.filename.localeCompare(b.filename)
-        );
+        const sortedUploads = uploadsData.sort((a, b) => {
+          const filenameA = a?.filename || '';
+          const filenameB = b?.filename || '';
+          return filenameA.localeCompare(filenameB);
+        });
 
         setUploads(sortedUploads);
         setUsers(usersData);
+        setLoading(false);
       } catch (err) {
-        console.error("Erreur lors du chargement des données:", err);
+        console.error("Erreur lors du chargement des données détaillée:", err);
+        console.error("Réponse d'erreur:", err.response);
+        console.error("Données d'erreur:", err.response?.data);
+        setError("Erreur lors du chargement des données: " + (err.response?.data?.message || err.message));
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  // Handle form input changes
+  /**
+   * 🇬🇧 Handle form input changes
+   * 🇫🇷 Gérer les changements dans les champs du formulaire
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Changement ${name}: ${value}`);
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  // Handle category selection
+  /**
+   * 🇬🇧 Handle category selection
+   * 🇫🇷 Gérer la sélection de catégorie
+   */
   const handleCategoryChange = (category) => {
     setFormData(prev => ({
       ...prev,
@@ -125,7 +158,10 @@ const PageFormPage = () => {
     }));
   };
 
-  // Handle file selection
+  /**
+   * 🇬🇧 Handle file selection
+   * 🇫🇷 Gérer la sélection de fichier
+   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -163,7 +199,10 @@ const PageFormPage = () => {
     setError(null);
   };
 
-  // Handle image removal
+  /**
+   * 🇬🇧 Handle image removal
+   * 🇫🇷 Gérer la suppression d'image
+   */
   const handleRemoveImage = () => {
     setNewImageFile(null);
     setImagePreview(null);
@@ -173,22 +212,29 @@ const PageFormPage = () => {
     }));
   };
 
-  // Handle existing image selection
+  /**
+   * 🇬🇧 Handle existing image selection
+   * 🇫🇷 Gérer la sélection d'une image existante
+   */
   const handleExistingImageSelect = (uploadId) => {
+    console.log('Image sélectionnée:', uploadId);
     setFormData(prev => ({
       ...prev,
-      upload_id: uploadId
+      upload_id: uploadId.toString()
     }));
     setNewImageFile(null);
     setImagePreview(null);
   };
 
-  // Handle form submission
+  /**
+   * 🇬🇧 Handle form submission
+   * 🇫🇷 Gérer la soumission du formulaire
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
-    if (!formData.title || !formData.content || !formData.user_id) {
+    if (!formData.title || !formData.content) {
       setError('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -196,18 +242,26 @@ const PageFormPage = () => {
     try {
       setSaving(true);
       setError(null);
+      console.log('Données du formulaire avant envoi:', formData);
 
       // Upload new image if provided
       let finalUploadId = formData.upload_id;
       
       if (newImageFile) {
+        console.log('Upload d\'une nouvelle image...');
         const imageFormData = new FormData();
         imageFormData.append('filename', newImageFile.name);
         imageFormData.append('file', newImageFile);
         imageFormData.append('type', 'image');
-        imageFormData.append('user_id', formData.user_id);
+        
+        // Utiliser l'ID de l'utilisateur actuel si disponible, sinon utiliser l'ID sélectionné
+        const currentUserId = localStorage.getItem('user_id') || formData.user_id;
+        if (currentUserId) {
+          imageFormData.append('user_id', currentUserId);
+        }
         
         const uploadResponse = await createUpload(imageFormData);
+        console.log('Réponse upload:', uploadResponse.data);
         finalUploadId = uploadResponse.data.id.toString();
       }
 
@@ -217,13 +271,17 @@ const PageFormPage = () => {
         content: formData.content,
         page_category: formData.page_category || null,
         upload_id: finalUploadId ? parseInt(finalUploadId) : null,
-        user_id: parseInt(formData.user_id)
+        user_id: parseInt(formData.user_id) || parseInt(localStorage.getItem('user_id') || '1')
       };
+
+      console.log('Données finales à envoyer:', submitData);
 
       if (isEditMode) {
         await updatePage(id, submitData);
+        console.log('Page mise à jour avec succès');
       } else {
         await createPage(submitData);
+        console.log('Page créée avec succès');
       }
 
       // Rediriger vers la liste des pages
@@ -268,7 +326,7 @@ const PageFormPage = () => {
               )}
 
               <div className="mb-3">
-                <label htmlFor="title" className="form-label">Titre</label>
+                <label htmlFor="title" className="form-label">Titre *</label>
                 <input
                   type="text"
                   className="form-control"
@@ -281,10 +339,13 @@ const PageFormPage = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label">Contenu</label>
+                <label className="form-label">Contenu *</label>
                 <TextEditor
                   value={formData.content} 
-                  onChange={(value) => setFormData((prev) => ({ ...prev, content: value }))} 
+                  onChange={(value) => {
+                    console.log('Contenu changé');
+                    setFormData((prev) => ({ ...prev, content: value }));
+                  }} 
                 />
               </div>
 
@@ -390,35 +451,85 @@ const PageFormPage = () => {
                     
                     {/* Liste des images disponibles */}
                     {uploads.filter(u => u.type === 'image').length > 0 ? (
-                      <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                        {uploads
-                          .filter(upload => upload.type === 'image')
-                          .map((upload) => (
-                            <div key={upload.id} className="col">
-                              <div 
-                                className={`card h-100 ${formData.upload_id === upload.id.toString() ? 'border-primary' : ''}`}
-                                onClick={() => handleExistingImageSelect(upload.id.toString())}
-                                style={{ cursor: 'pointer' }}
-                              >
-                                <div className="card-img-top" style={{ height: '120px', overflow: 'hidden' }}>
-                                  <img 
-                                    src={upload.url}
-                                    alt={upload.filename}
-                                    className="img-fluid w-100 h-100"
-                                    style={{ objectFit: 'cover' }}
-                                    onError={(e) => e.target.src = 'https://placehold.co/100x100?text=Error'}
-                                  />
-                                </div>
-                                <div className="card-body p-2">
-                                  <p className="card-text small text-truncate mb-0" title={upload.filename}>
-                                    {upload.filename}
-                                  </p>
+                      <>
+                        <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                          {uploads
+                            .filter(upload => upload.type === 'image')
+                            .slice((currentPage - 1) * imagesPerPage, currentPage * imagesPerPage)
+                            .map((upload) => (
+                              <div key={upload.id} className="col">
+                                <div 
+                                  className={`card h-100 ${formData.upload_id === upload.id.toString() ? 'border-primary border-2' : ''}`}
+                                  onClick={() => handleExistingImageSelect(upload.id)}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  <div className="card-img-top" style={{ height: '120px', overflow: 'hidden' }}>
+                                    <img 
+                                      src={upload.url}
+                                      alt={upload.filename}
+                                      className="img-fluid w-100 h-100"
+                                      style={{ objectFit: 'cover' }}
+                                      onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://placehold.co/100x100?text=Error';
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="card-body p-2">
+                                    <p className="card-text small text-truncate mb-0" title={upload.filename}>
+                                      {upload.filename}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))
-                        }
-                      </div>
+                            ))
+                          }
+                        </div>
+                        
+                        {/* Pagination */}
+                        {uploads.filter(u => u.type === 'image').length > imagesPerPage && (
+                          <div className="mt-3 d-flex justify-content-center">
+                            <nav>
+                              <ul className="pagination">
+                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                  <button 
+                                    className="page-link"
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                  >
+                                    Précédent
+                                  </button>
+                                </li>
+                                
+                                {Array.from({ 
+                                  length: Math.ceil(uploads.filter(u => u.type === 'image').length / imagesPerPage) 
+                                }, (_, i) => i + 1).map(pageNum => (
+                                  <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
+                                    <button 
+                                      className="page-link"
+                                      onClick={() => setCurrentPage(pageNum)}
+                                    >
+                                      {pageNum}
+                                    </button>
+                                  </li>
+                                ))}
+                                
+                                <li className={`page-item ${currentPage === Math.ceil(uploads.filter(u => u.type === 'image').length / imagesPerPage) ? 'disabled' : ''}`}>
+                                  <button 
+                                    className="page-link"
+                                    onClick={() => setCurrentPage(prev => 
+                                      Math.min(prev + 1, Math.ceil(uploads.filter(u => u.type === 'image').length / imagesPerPage))
+                                    )}
+                                    disabled={currentPage === Math.ceil(uploads.filter(u => u.type === 'image').length / imagesPerPage)}
+                                  >
+                                    Suivant
+                                  </button>
+                                </li>
+                              </ul>
+                            </nav>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <p className="text-muted">
                         Aucune image disponible. Veuillez télécharger une nouvelle image.
@@ -436,15 +547,17 @@ const PageFormPage = () => {
                   name="user_id"
                   value={formData.user_id}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Sélectionner un créateur</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
-                      {user.username || user.email}
+                      {user.username || user.email || `User #${user.id}`}
                     </option>
                   ))}
                 </select>
+                <small className="text-muted">
+                  Si non sélectionné, l'utilisateur actuel sera utilisé
+                </small>
               </div>
 
               <div className="text-end">

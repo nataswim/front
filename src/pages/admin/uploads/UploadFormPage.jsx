@@ -13,7 +13,6 @@ import {
 import { getUpload, createUpload, updateUpload } from '../../../services/uploads';
 import { getUsers } from '../../../services/users';
 
-
 const UploadFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,7 +32,10 @@ const UploadFormPage = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
 
-  // Load upload data if in edit mode
+  /**
+   * 🇬🇧 Load upload data if in edit mode
+   * 🇫🇷 Charger les données du fichier si en mode édition
+   */
   useEffect(() => {
     const fetchUpload = async () => {
       if (isEditMode) {
@@ -41,6 +43,8 @@ const UploadFormPage = () => {
           setLoading(true);
           const response = await getUpload(id);
           const uploadData = response.data;
+          
+          console.log('Données du fichier chargées:', uploadData);
           
           setFormData({
             filename: uploadData.filename || '',
@@ -50,14 +54,8 @@ const UploadFormPage = () => {
           });
 
           // Set preview for images
-          if (uploadData.type === 'image') {
-            // Construire une URL complète à partir du chemin stocké dans le modèle
-            const baseUrl = 'http://127.0.0.1:8000'; // URL de base API
-            if (uploadData.path) {
-              // Vérifier si le chemin commence par un slash
-              const path = uploadData.path.startsWith('/') ? uploadData.path : `/${uploadData.path}`;
-              setPreview(`${baseUrl}${path}`);
-            }
+          if (uploadData.type === 'image' && uploadData.url) {
+            setPreview(uploadData.url);
           }
           
           setLoading(false);
@@ -72,19 +70,15 @@ const UploadFormPage = () => {
     fetchUpload();
   }, [id, isEditMode]);
 
-  // Load users
+  /**
+   * 🇬🇧 Load users
+   * 🇫🇷 Charger les utilisateurs
+   */
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Remplacer ceci
-        // const response = await fetch('http://127.0.0.1:8000/api/users');
-        // const data = await response.json();
-        
-        // Par ceci
         const response = await getUsers();
-        const data = response.data;
-        
-        setUsers(data);
+        setUsers(response.data);
       } catch (err) {
         console.error("Error fetching users:", err);
       }
@@ -93,7 +87,10 @@ const UploadFormPage = () => {
     fetchUsers();
   }, []);
 
-  // Handle file selection
+  /**
+   * 🇬🇧 Handle file selection
+   * 🇫🇷 Gérer la sélection de fichier
+   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -142,7 +139,10 @@ const UploadFormPage = () => {
     setError(null);
   };
 
-  // Handle form submission
+  /**
+   * 🇬🇧 Handle form submission
+   * 🇫🇷 Gérer la soumission du formulaire
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -156,6 +156,11 @@ const UploadFormPage = () => {
       
       if (formData.file) {
         formPayload.append('file', formData.file);
+      }
+
+      // Debugging - log FormData content
+      for (let pair of formPayload.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
       }
 
       if (isEditMode) {
@@ -173,7 +178,10 @@ const UploadFormPage = () => {
     }
   };
 
-  // Get icon based on file type
+  /**
+   * 🇬🇧 Get icon based on file type
+   * 🇫🇷 Obtenir l'icône en fonction du type de fichier
+   */
   const getFileIcon = (type) => {
     switch (type) {
       case 'image': return <FaImage size={40} />;
@@ -228,7 +236,7 @@ const UploadFormPage = () => {
                           </div>
                           <div className="text-center mb-3">
                             <h5 className="mb-1">
-                              {formData.file ? formData.file.name : 'Sélectionnez un fichier'}
+                              {formData.file ? formData.file.name : (isEditMode ? formData.filename : 'Sélectionnez un fichier')}
                             </h5>
                             <p className="text-muted small mb-0">
                               PNG, JPG, GIF jusqu'à 5MB
@@ -243,7 +251,7 @@ const UploadFormPage = () => {
                                 accept="image/*,video/*,audio/*,.pdf"
                               />
                               <FaUpload className="me-2" />
-                              {formData.file ? 'Changer le fichier' : 'Sélectionner un fichier'}
+                              {isEditMode ? 'Changer le fichier' : 'Sélectionner un fichier'}
                             </label>
                             {formData.file && (
                               <button
@@ -328,7 +336,16 @@ const UploadFormPage = () => {
                           src={preview} 
                           alt="Preview" 
                           className="img-fluid rounded"
+                          onError={(e) => {
+                            console.error('Erreur de chargement de l\'image:', preview);
+                            e.target.src = 'https://placehold.co/400x300?text=Erreur+de+chargement';
+                          }}
                         />
+                        {isEditMode && !formData.file && (
+                          <p className="text-muted small mt-2">
+                            Image actuelle - sélectionnez un nouveau fichier pour la remplacer
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}

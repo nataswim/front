@@ -251,15 +251,15 @@ const SwimSetsFormPage = () => {
       
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button 
-          className="btn btn-outline-primary d-flex align-items-center"
+          className="btn btn-success btn-lg d-flex align-items-center"
           onClick={() => navigate('/admin/swim-sets')}
         >
-          <FaArrowLeft className="me-2" /> Retour à la liste
+          <FaArrowLeft className="me-2" /> Voir Les Séries 
         </button>
         
         <button
           type="button"
-          className="btn btn-success d-flex align-items-center"
+          className="btn btn-danger btn-lg d-flex align-items-center"
           onClick={() => document.getElementById('swim-set-form').requestSubmit()}
           disabled={saving}
         >
@@ -298,7 +298,7 @@ const SwimSetsFormPage = () => {
             <div className="col-lg-6">
               <div className="card shadow-sm mb-4">
                 <div className="card-header bg-white">
-                  <h5 className="card-title mb-0">Informations principales</h5>
+                  <h5 className="card-title mb-0">Infos Séance & Exercice</h5>
                 </div>
                 <div className="card-body">
                   <div className="mb-4">
@@ -325,12 +325,13 @@ const SwimSetsFormPage = () => {
                     
                     {selectedWorkout && (
                       <div className="mt-2 p-2 bg-light rounded">
-                        <p className="text-muted small mb-1">
-                          {selectedWorkout.description ? 
-                            selectedWorkout.description : 
+                        <div className="text-muted small mb-1">
+                          {selectedWorkout.description ? (
+                            <div dangerouslySetInnerHTML={{ __html: selectedWorkout.description }} />
+                          ) : (
                             "Aucune description disponible"
-                          }
-                        </p>
+                          )}
+                        </div>
                         {selectedWorkout.workout_category && (
                           <span className="badge bg-primary bg-opacity-10 text-primary">
                             <FaRunning className="me-1" /> {selectedWorkout.workout_category}
@@ -364,12 +365,13 @@ const SwimSetsFormPage = () => {
                     
                     {selectedExercise && (
                       <div className="mt-2 p-2 bg-light rounded">
-                        <p className="text-muted small mb-1">
-                          {selectedExercise.description ? 
-                            selectedExercise.description : 
+                        <div className="text-muted small mb-1">
+                          {selectedExercise.description ? (
+                            <div dangerouslySetInnerHTML={{ __html: selectedExercise.description }} />
+                          ) : (
                             "Aucune description disponible"
-                          }
-                        </p>
+                          )}
+                        </div>
                         <div>
                           {selectedExercise.exercise_level && (
                             <span className="badge bg-secondary bg-opacity-10 text-secondary me-2">
@@ -387,55 +389,13 @@ const SwimSetsFormPage = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="card shadow-sm mb-4">
-                <div className="card-header bg-white">
-                  <h5 className="card-title mb-0 d-flex align-items-center">
-                    <FaSwimmer className="me-2 text-primary" /> Distance
-                  </h5>
-                </div>
-                <div className="card-body">
-                  <div className="mb-3">
-                    <label htmlFor="set_distance" className="form-label">Distance (mètres)</label>
-                    <div className="input-group">
-                      <input
-                        type="number"
-                        className="form-control"
-                        id="set_distance"
-                        name="set_distance"
-                        value={formData.set_distance}
-                        onChange={handleChange}
-                        required
-                        min="1"
-                      />
-                      <span className="input-group-text">m</span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <p className="mb-2">Distances courantes:</p>
-                    <div className="d-flex flex-wrap gap-2">
-                      {commonDistances.map((distance) => (
-                        <button
-                          key={distance}
-                          type="button"
-                          className={`btn ${formData.set_distance === distance.toString() ? 'btn-primary' : 'btn-outline-primary'} btn-sm`}
-                          onClick={() => handleQuickSelect('set_distance', distance)}
-                        >
-                          {distance}m
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="col-lg-6">
               <div className="row">
                 <div className="col-md-6">
                   <div className="card shadow-sm mb-4 h-100">
-                    <div className="card-header bg-white">
+                    <div className="card-header bg-primary">
                       <h5 className="card-title mb-0 d-flex align-items-center">
                         <FaRedoAlt className="me-2 text-primary" /> Répétitions
                       </h5>
@@ -475,7 +435,7 @@ const SwimSetsFormPage = () => {
 
                 <div className="col-md-6">
                   <div className="card shadow-sm mb-4 h-100">
-                    <div className="card-header bg-white">
+                    <div className="card-header bg-primary">
                       <h5 className="card-title mb-0 d-flex align-items-center">
                         <FaStopwatch className="me-2 text-primary" /> Temps de repos
                       </h5>
@@ -517,14 +477,56 @@ const SwimSetsFormPage = () => {
                 </div>
               </div>
 
+              <div className="card shadow-sm mb-4">
+                <div className="card-header bg-primary">
+                  <h5 className="card-title mb-0 d-flex align-items-center">
+                    <FaSwimmer className="me-2 text-primary" /> Distance
+                  </h5>
+                </div>
+                <div className="card-body">
+                  <div className="mb-3">
+                    <label htmlFor="set_distance" className="form-label">Distance (mètres)</label>
+                    <div className="input-group">
+                      <input
+                        type="number"
+                        className="form-control"
+                        id="set_distance"
+                        name="set_distance"
+                        value={formData.set_distance}
+                        onChange={handleChange}
+                        required
+                        min="1"
+                      />
+                      <span className="input-group-text">m</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="mb-2">Distances courantes:</p>
+                    <div className="d-flex flex-wrap gap-2">
+                      {commonDistances.map((distance) => (
+                        <button
+                          key={distance}
+                          type="button"
+                          className={`btn ${formData.set_distance === distance.toString() ? 'btn-primary' : 'btn-outline-primary'} btn-sm`}
+                          onClick={() => handleQuickSelect('set_distance', distance)}
+                        >
+                          {distance}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Résumé */}
               <div className="card shadow-sm mb-4">
-                <div className="card-header bg-white">
+                <div className="card-header bg-warning">
                   <h5 className="card-title mb-0 d-flex align-items-center">
                     <FaCalculator className="me-2 text-primary" /> Résumé de la série
                   </h5>
                 </div>
-                <div className="card-body bg-light">
+                <div className="card-body bg-warning">
                   <div className="row">
                     <div className="col-md-4 mb-2">
                       <span className="text-muted">Distance par répétition:</span>

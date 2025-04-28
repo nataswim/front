@@ -15,10 +15,7 @@ const AdminSwimSetsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /**
-   * 🇬🇧 Fetch swim sets with exercise details included from backend
-   * 🇫🇷 Récupération des séries de natation avec les détails des exercices inclus depuis le backend
-   */
+  // Fonction de récupération qui contourne le service api
   const fetchSwimSets = async () => {
     try {
       setLoading(true);
@@ -52,10 +49,7 @@ const AdminSwimSetsPage = () => {
     fetchSwimSets();
   }, []);
 
-  /**
-   * 🇬🇧 Calculate total distance for each set
-   * 🇫🇷 Calculer le total pour chaque série (distance × répétition)
-   */
+  // Calculer le total pour chaque série (distance × répétition)
   const calculateTotal = (set) => {
     const distance = set.set_distance || 0;
     const repetition = set.set_repetition || 1;
@@ -142,15 +136,9 @@ const AdminSwimSetsPage = () => {
                         </span>
                       </td>
                       <td>
-                        {set.exercise ? (
-                          <span className="badge bg-primary">
-                            {set.exercise.title}
-                          </span>
-                        ) : (
-                          <span className="badge bg-secondary">
-                            Exercice non trouvé
-                          </span>
-                        )}
+                        <span className="badge bg-primary">
+                          Exercice #{set.exercise_id}
+                        </span>
                       </td>
                       <td>
                         <div className="d-flex justify-content-center gap-1">

@@ -176,17 +176,17 @@ const SwimSetsPage = () => {
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button 
-          className="btn btn-outline-primary d-flex align-items-center"
+          className="btn btn-success btn-lg d-flex align-items-center"
           onClick={handleBack}
         >
-          <FaArrowLeft className="me-2" /> Retour à la liste
+          <FaArrowLeft className="me-2" /> Voir Les Séries
         </button>
         
         <button
-          className="btn btn-success d-flex align-items-center"
+          className="btn btn-danger btn-lg d-flex align-items-center"
           onClick={handleEdit}
         >
-          <FaEdit className="me-2" /> Modifier
+          <FaEdit className="me-2" /> Modifier cette Série
         </button>
       </div>
 
