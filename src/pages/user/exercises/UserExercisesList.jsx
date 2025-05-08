@@ -1,24 +1,30 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaEye, 
   FaFilter, 
   FaSearch, 
   FaSync,
-  FaDumbbell,
-  FaTag,
-  FaUser,
-  FaCalendarAlt,
-  FaImage
+  FaSwimmingPool,
+  FaSwimmer
 } from 'react-icons/fa';
-import { getExercises, deleteExercise } from '../../../services/exercises';
-import { getUpload } from '../../../services/uploads';
+import { getExercises } from '../../services/exercises';
+import { getUpload } from '../../services/uploads';
 
-const UserExercisesPage = () => {
+/**
+ * 🇬🇧 User's exercises list component with card display
+ * This component displays a grid of swimming training exercises with filtering and pagination
+ * 
+ * 🇫🇷 Composant de liste d'exercices utilisateur avec affichage en cartes
+ * Ce composant affiche une grille d'exercices d'entraînement de natation avec filtrage et pagination
+ */
+const UserExercisesList = () => {
   const navigate = useNavigate();
+  
+  /**
+   * 🇬🇧 State management for the component
+   * 
+   * 🇫🇷 Gestion des états du composant
+   */
   const [exercises, setExercises] = useState([]);
   const [imageData, setImageData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -27,24 +33,28 @@ const UserExercisesPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(12); // Augmenté pour afficher plus de cartes à la fois
   const [thumbnailErrors, setThumbnailErrors] = useState({});
 
-  // Exercise categories and levels
+  // Catégories et niveaux d'exercices
   const exerciseCategories = ['Correctif De Nage', 'Correctif De Style', 'Travail de Base'];
   const exerciseLevels = ['Débutant', 'Intermédiaire', 'Avancé'];
 
-  // Fetch exercises
+  /**
+   * 🇬🇧 Fetch exercises data from API
+   * 
+   * 🇫🇷 Récupération des données d'exercices depuis l'API
+   */
   const fetchExercises = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getExercises();
       setExercises(response.data);
       
-      // Fetch images for exercises with upload_id
+      // Récupérer les images pour les exercices avec upload_id
       const exercisesWithImages = response.data.filter(exercise => exercise.upload_id);
       
-      // Fetch images in parallel
+      // Récupérer les images en parallèle
       const imagePromises = exercisesWithImages.map(exercise => 
         getUpload(exercise.upload_id)
           .then(res => ({ exerciseId: exercise.id, imageData: res.data }))
@@ -56,7 +66,7 @@ const UserExercisesPage = () => {
       
       const imagesResults = await Promise.all(imagePromises);
       
-      // Create image data object
+      // Créer un objet de données d'images
       const imagesObj = imagesResults.reduce((acc, item) => {
         if (item.imageData) {
           acc[item.exerciseId] = item.imageData;
@@ -74,11 +84,16 @@ const UserExercisesPage = () => {
     }
   }, []);
 
+  // Charger les exercices au montage du composant
   useEffect(() => {
     fetchExercises();
   }, [fetchExercises]);
 
-  // Filter exercises - mémoïsé pour éviter des recalculs inutiles
+  /**
+   * 🇬🇧 Filter exercises based on search term, category and level
+   * 
+   * 🇫🇷 Filtrer les exercices selon le terme de recherche, la catégorie et le niveau
+   */
   const filteredExercises = useMemo(() => {
     return exercises.filter(exercise => {
       const matchesSearch = exercise.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,7 +104,7 @@ const UserExercisesPage = () => {
     });
   }, [exercises, searchTerm, categoryFilter, levelFilter]);
 
-  // Pagination - mémoïsé pour éviter des recalculs inutiles
+  // Pagination
   const paginationData = useMemo(() => {
     const pageCount = Math.ceil(filteredExercises.length / itemsPerPage);
     const offset = currentPage * itemsPerPage;
@@ -97,19 +112,11 @@ const UserExercisesPage = () => {
     return { pageCount, currentExercises };
   }, [filteredExercises, currentPage, itemsPerPage]);
 
-  // Delete handler
-  const handleDelete = useCallback(async (id, title) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'exercice "${title}" ?`)) {
-      try {
-        await deleteExercise(id);
-        await fetchExercises();
-      } catch (err) {
-        setError('Erreur lors de la suppression: ' + err.message);
-      }
-    }
-  }, [fetchExercises]);
-
-  // Handle thumbnail error
+  /**
+   * 🇬🇧 Handle thumbnail loading errors
+   * 
+   * 🇫🇷 Gestion des erreurs de chargement des miniatures
+   */
   const handleThumbnailError = useCallback((exerciseId) => {
     setThumbnailErrors(prev => ({
       ...prev,
@@ -117,24 +124,16 @@ const UserExercisesPage = () => {
     }));
   }, []);
 
-  // Get level badge color
-  const getLevelBadgeColor = useCallback((level) => {
-    switch (level) {
-      case 'Débutant': return 'success';
-      case 'Intermédiaire': return 'warning';
-      case 'Avancé': return 'danger';
-      default: return 'secondary';
-    }
-  }, []);
+  /**
+   * 🇬🇧 Navigate to exercise details
+   * 
+   * 🇫🇷 Naviguer vers les détails de l'exercice
+   */
+  const handleExerciseClick = useCallback((exerciseId) => {
+    navigate(`/user/exercises/${exerciseId}`);
+  }, [navigate]);
 
-  // Format description preview
-  const formatDescriptionPreview = useCallback((description, maxLength = 120) => {
-    if (!description) return "Aucune description disponible";
-    return description.length > maxLength 
-      ? description.substring(0, maxLength) + '...'
-      : description;
-  }, []);
-
+  // Affichage pendant le chargement
   if (loading) {
     return (
       <div className="container py-4">
@@ -149,15 +148,19 @@ const UserExercisesPage = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="display-6 fw-bold mb-4 title-swim">
+      {/* En-tête */}
+      <div>
+        <h1 className="display-6 fw-bold mb-4 title-swim">Educatifs</h1>
+      </div>
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="h2 mb-0"> Exercices</h1>
           <p className="text-muted mb-0">
+            {exercises.length} exercice{exercises.length > 1 ? 's' : ''} au total
           </p>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filtres */}
       <div className="card shadow-sm mb-4">
         <div className="card-body">
           <div className="row g-3">
@@ -224,92 +227,73 @@ const UserExercisesPage = () => {
         </div>
       </div>
 
+      {/* Message d'erreur */}
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
       )}
 
-      {/* Exercises List */}
-      <div className="row g-4">
-        {paginationData.currentExercises.length === 0 ? (
-          <div className="col-12">
-            <div className="alert alert-info" role="alert">
+      {/* Affichage en cartes */}
+      {paginationData.currentExercises.length === 0 ? (
+        <div className="card shadow-sm">
+          <div className="card-body p-5 text-center">
+            <FaSwimmer className="text-muted fs-1 mb-3" aria-hidden="true" />
+            <p className="text-muted">
               Aucun exercice ne correspond à vos critères de recherche.
-            </div>
+            </p>
           </div>
-        ) : (
-          paginationData.currentExercises.map((exercise) => (
-            <div key={exercise.id} className="col-md-6 col-xl-4">
-              <div className="card h-100 shadow-sm hover-lift">
-                <div className="card-header bg-white border-bottom-0">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className={`badge bg-${getLevelBadgeColor(exercise.exercise_level)}`}>
-                      {exercise.exercise_level || 'Non défini'}
-                    </span>
-                    <small className="text-muted">
-                      Réf: {exercise.id}
-                    </small>
-                  </div>
-                </div>
-                <div className="card-body d-flex flex-column align-items-center">
-                  {/* Image or Icon */}
-                  <div 
-                    className="mb-3 d-flex justify-content-center align-items-center" 
-                    style={{ height: '150px', width: '100%' }}
-                  >
-                    {exercise.upload_id && imageData[exercise.id] && imageData[exercise.id].url && !thumbnailErrors[exercise.id] ? (
-                      <img
-                        src={imageData[exercise.id].url}
-                        alt=""
-                        className="img-fluid rounded"
-                        style={{ 
-                          maxHeight: '150px',
-                          maxWidth: '100%',
-                          objectFit: 'contain'
-                        }}
-                        onError={() => handleThumbnailError(exercise.id)}
-                      />
-                    ) : (
-                      <div className="bg-light rounded d-flex justify-content-center align-items-center" style={{ height: '100px', width: '100px' }}>
-                        {exercise.upload_id ? <FaImage size={32} aria-hidden="true" /> : <FaDumbbell size={32} aria-hidden="true" />}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Title and Category */}
-                  <h3 className="h5 card-title text-center mb-2">{exercise.title}</h3>
-                  
-                  {exercise.exercise_category && (
-                    <span className="badge bg-info bg-opacity-10 text-info mb-3">
-                      <FaTag className="me-1" aria-hidden="true" /> {exercise.exercise_category}
-                    </span>
+        </div>
+      ) : (
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 g-4 mb-4">
+          {paginationData.currentExercises.map((exercise) => (
+            <div key={exercise.id} className="col">
+              <div 
+                className="card h-100 shadow-sm hover-lift" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleExerciseClick(exercise.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleExerciseClick(exercise.id);
+                  }
+                }}
+                tabIndex="0"
+                role="button"
+                aria-label={`Voir les détails de l'exercice ${exercise.title}`}
+              >
+                <div className="card-img-container" style={{ height: '180px', overflow: 'hidden' }}>
+                  {exercise.upload_id && imageData[exercise.id] && imageData[exercise.id].url && !thumbnailErrors[exercise.id] ? (
+                    <img
+                      src={imageData[exercise.id].url}
+                      alt=""
+                      className="card-img-top"
+                      style={{ 
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onError={() => handleThumbnailError(exercise.id)}
+                    />
+                  ) : (
+                    <div className="bg-light d-flex justify-content-center align-items-center h-100">
+                      <FaSwimmingPool className="text-primary" style={{ fontSize: '3rem' }} aria-hidden="true" />
+                    </div>
                   )}
                 </div>
-                <div className="card-footer bg-white border-top-0">
-                  <div className="d-flex justify-content-between">
-                    <button 
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => navigate(`/user/exercises/${exercise.id}`)}
-                      aria-label={`Voir les détails de l'exercice ${exercise.title}`}
-                    >
-                      <FaEye className="me-1" aria-hidden="true" /> Plus de Détails
-                    </button>
-                    <div>
-                      
-                    </div>
-                  </div>
+                <div className="card-body text-center">
+                  <h5 className="card-title">{exercise.title}</h5>
                 </div>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {filteredExercises.length > itemsPerPage && (
-        <nav aria-label="Navigation des pages d'exercices" className="mt-4">
-          <div className="card">
+        <nav aria-label="Pagination des exercices">
+          <div className="card mt-4">
             <div className="card-body d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center">
                 <span className="me-2">Afficher</span>
@@ -323,10 +307,10 @@ const UserExercisesPage = () => {
                   style={{width: '70px'}}
                   aria-label="Nombre d'éléments par page"
                 >
-                  <option value="5">5</option>
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
+                  <option value="8">8</option>
+                  <option value="12">12</option>
+                  <option value="16">16</option>
+                  <option value="24">24</option>
                 </select>
                 <span className="ms-2">éléments</span>
               </div>
@@ -371,8 +355,28 @@ const UserExercisesPage = () => {
           </div>
         </nav>
       )}
+
+      {/* CSS pour l'effet de survol */}
+      <style jsx="true">{`
+        .hover-lift:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+          transition: all 0.3s ease;
+        }
+        .hover-lift {
+          transition: all 0.3s ease;
+        }
+        .hover-lift:hover img {
+          transform: scale(1.05);
+        }
+        .hover-lift:focus {
+          outline: 3px solid #048080;
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default React.memo(UserExercisesPage);
+export default React.memo(UserExercisesList);
