@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ErrorComponent from './ErrorComponent';
+import PropTypes from 'prop-types';
 
 /**
  * Composant ErrorBoundary pour capturer les erreurs de rendu React
@@ -39,6 +40,11 @@ class ErrorBoundary extends Component {
     
     // Si vous avez un service de journalisation, l'appeler ici
     // logErrorService.logError(error, errorInfo);
+    
+    // Notifier les services d'analyse d'erreurs si configurés
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   render() {
@@ -72,5 +78,11 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+// PropTypes pour la vérification des types
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+  onError: PropTypes.func
+};
 
 export default ErrorBoundary;

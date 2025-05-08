@@ -1,6 +1,23 @@
 import React, { useState, useRef } from 'react';
 import { FaUpload, FaImage, FaFile, FaVideo, FaMusic, FaTrash } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
+/**
+ * Composant de téléchargement de fichiers accessible
+ * 
+ * @param {Object} props - Les propriétés du composant
+ * @param {string} props.id - ID unique pour le champ
+ * @param {string} props.name - Nom du champ pour les formulaires
+ * @param {Function} props.onChange - Fonction appelée lors du changement de fichier
+ * @param {string} [props.label='Téléverser un fichier'] - Texte d'étiquette
+ * @param {string} [props.accept='image/*'] - Types de fichiers acceptés
+ * @param {boolean} [props.multiple=false] - Autoriser plusieurs fichiers
+ * @param {boolean} [props.disabled=false] - Désactiver le champ
+ * @param {string} [props.error] - Message d'erreur à afficher
+ * @param {Function} [props.onRemove] - Fonction appelée lors de la suppression d'un fichier
+ * @param {Array} [props.initialFiles=[]] - Fichiers initiaux
+ * @param {string} [props.className=''] - Classes CSS additionnelles
+ */
 const FileUpload = ({
   id,
   name,
@@ -17,13 +34,16 @@ const FileUpload = ({
   const fileInputRef = useRef(null);
   const [files, setFiles] = useState(initialFiles);
   const [previews, setPreviews] = useState({});
+  
+  // Générer un ID unique pour les messages d'erreur
+  const errorId = error ? `${id}-error` : undefined;
 
   // Get file icon based on type
   const getFileIcon = (file) => {
-    if (file.type.startsWith('image/')) return <FaImage />;
-    if (file.type.startsWith('video/')) return <FaVideo />;
-    if (file.type.startsWith('audio/')) return <FaMusic />;
-    return <FaFile />;
+    if (file.type.startsWith('image/')) return <FaImage aria-hidden="true" />;
+    if (file.type.startsWith('video/')) return <FaVideo aria-hidden="true" />;
+    if (file.type.startsWith('audio/')) return <FaMusic aria-hidden="true" />;
+    return <FaFile aria-hidden="true" />;
   };
 
   // Format file size
@@ -107,7 +127,7 @@ const FileUpload = ({
   return (
     <div className={`mb-4 ${className}`}>
       {label && (
-        <label className="form-label">
+        <label className="form-label" htmlFor={id}>
           {label}
         </label>
       )}
@@ -119,20 +139,32 @@ const FileUpload = ({
         `}
         onClick={() => !disabled && fileInputRef.current?.click()}
         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+        role="button"
+        tabIndex="0"
+        onKeyPress={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            !disabled && fileInputRef.current?.click();
+          }
+        }}
+        aria-labelledby={`${id}-instructions`}
       >
         <div className="card-body text-center py-5">
           <input
             ref={fileInputRef}
             type="file"
             className="d-none"
+            id={id}
+            name={name}
             accept={accept}
             multiple={multiple}
             disabled={disabled}
             onChange={handleFileChange}
+            aria-describedby={errorId}
+            aria-invalid={error ? 'true' : 'false'}
           />
           
-          <FaUpload className="text-primary mb-3" size={32} />
-          <p className="mb-1">
+          <FaUpload className="text-primary mb-3" size={32} aria-hidden="true" />
+          <p className="mb-1" id={`${id}-instructions`}>
             {files.length > 0 ? 'Cliquez pour ajouter plus de fichiers' : 'Cliquez pour sélectionner des fichiers'}
           </p>
           <p className="text-muted small mb-0">
@@ -142,22 +174,22 @@ const FileUpload = ({
       </div>
 
       {error && (
-        <div className="alert alert-danger py-2">
+        <div className="alert alert-danger py-2" id={errorId} role="alert">
           {error}
         </div>
       )}
 
       {files.length > 0 && (
-        <div className="list-group">
+        <div className="list-group" role="list" aria-label="Fichiers sélectionnés">
           {files.map((file, index) => (
-            <div key={`${file.name}-${index}`} className="list-group-item">
+            <div key={`${file.name}-${index}`} className="list-group-item" role="listitem">
               <div className="d-flex align-items-center">
                 {/* Preview or Icon */}
                 <div className="me-3" style={{width: '50px', height: '50px'}}>
                   {previews[file.name] ? (
                     <img 
                       src={previews[file.name]}
-                      alt={file.name}
+                      alt={`Aperçu de ${file.name}`}
                       className="img-fluid rounded"
                       style={{width: '50px', height: '50px', objectFit: 'cover'}}
                     />
@@ -183,8 +215,9 @@ const FileUpload = ({
                       e.stopPropagation();
                       handleRemove(file, index);
                     }}
+                    aria-label={`Supprimer le fichier ${file.name}`}
                   >
-                    <FaTrash />
+                    <FaTrash aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -194,6 +227,21 @@ const FileUpload = ({
       )}
     </div>
   );
+};
+
+// PropTypes pour la vérification des types
+FileUpload.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  label: PropTypes.string,
+  accept: PropTypes.string,
+  multiple: PropTypes.bool,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  onRemove: PropTypes.func,
+  initialFiles: PropTypes.array,
+  className: PropTypes.string
 };
 
 export default FileUpload;

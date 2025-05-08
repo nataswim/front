@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  * @param {string} [props.className] - Classes CSS supplémentaires
  * @param {React.ReactNode} props.children - Contenu du bouton
  * @param {Function} [props.onClick] - Gestionnaire d'événement de clic
+ * @param {string} [props.ariaLabel] - Texte alternatif pour l'accessibilité
  */
 const Button = ({
   type = 'primary',
@@ -21,7 +22,8 @@ const Button = ({
   desactive = false,
   className = '',
   children,
-  onClick
+  onClick,
+  ariaLabel
 }) => {
   // Définir les styles de base pour les types de boutons
   const stylesType = {
@@ -57,6 +59,7 @@ const Button = ({
       disabled={desactive}
       onClick={onClick}
       type="button"
+      aria-label={ariaLabel || undefined}
     >
       {children}
     </button>
@@ -70,7 +73,8 @@ Button.propTypes = {
   desactive: PropTypes.bool,
   className: PropTypes.string,
   children: PropTypes.node.isRequired,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  ariaLabel: PropTypes.string
 };
 
 export default Button;

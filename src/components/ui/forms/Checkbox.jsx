@@ -2,6 +2,7 @@
 // Personnalisation visuelle des cases à cocher
 // Les cases à cocher sont des éléments d'interface utilisateur qui permettent aux utilisateurs de sélectionner une ou plusieurs options dans une liste.
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Composant Checkbox qui affiche une case à cocher personnalisée
@@ -26,6 +27,9 @@ const Checkbox = ({
   error,
   className = '',
 }) => {
+  // Générer un ID unique pour les messages d'erreur
+  const errorId = error ? `${id}-error` : undefined;
+
   return (
     <div className={`flex items-start ${className}`}>
       <div className="flex items-center h-5">
@@ -44,6 +48,7 @@ const Checkbox = ({
             transition-colors
           `}
           aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={errorId}
         />
       </div>
       
@@ -62,12 +67,24 @@ const Checkbox = ({
       )}
       
       {error && (
-        <p className="mt-1 text-sm text-red-600" id={`${id}-error`}>
+        <p className="mt-1 text-sm text-red-600" id={errorId}>
           {error}
         </p>
       )}
     </div>
   );
+};
+
+// PropTypes pour la vérification des types
+Checkbox.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  checked: PropTypes.bool,
+  onChange: PropTypes.func.isRequired,
+  label: PropTypes.string,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  className: PropTypes.string
 };
 
 export default Checkbox;

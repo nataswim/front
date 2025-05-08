@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaHome, FaArrowLeft, FaLifeRing, FaWater } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 /**
  * Composant d'erreur réutilisable pour différents types d'erreurs
@@ -28,13 +29,13 @@ const ErrorComponent = ({
 }) => {
   // Illustration par défaut (vagues d'eau pour thème natation)
   const defaultIllustration = (
-    <div className="text-primary my-4" style={{ fontSize: '120px' }}>
+    <div className="text-primary my-4" style={{ fontSize: '120px' }} aria-hidden="true">
       <FaWater />
     </div>
   );
 
   return (
-    <div className="error-container py-5">
+    <div className="error-container py-5" role="alert" aria-live="polite">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-8 text-center">
@@ -49,11 +50,11 @@ const ErrorComponent = ({
             <h1 className="error-title mb-4">{title}</h1>
 
             {/* Illustration */}
-            <div className="error-illustration mb-4">
+            <div className="error-illustration mb-4" aria-hidden="true">
               {illustration ? (
                 <img 
                   src={illustration} 
-                  alt={title} 
+                  alt="" 
                   className="img-fluid" 
                   style={{ maxHeight: '250px' }}
                 />
@@ -74,7 +75,7 @@ const ErrorComponent = ({
             <div className="error-actions d-flex flex-wrap justify-content-center gap-3">
               {showHomeButton && (
                 <Link to="/" className="btn btn-primary">
-                  <FaHome className="me-2" /> Retour à l'accueil
+                  <FaHome className="me-2" aria-hidden="true" /> Retour à l'accueil
                 </Link>
               )}
 
@@ -83,13 +84,13 @@ const ErrorComponent = ({
                   onClick={() => window.history.back()}
                   className="btn btn-outline-secondary"
                 >
-                  <FaArrowLeft className="me-2" /> Page précédente
+                  <FaArrowLeft className="me-2" aria-hidden="true" /> Page précédente
                 </button>
               )}
 
               {showSupportButton && (
                 <Link to="/contact" className="btn btn-outline-primary">
-                  <FaLifeRing className="me-2" /> Contacter le support
+                  <FaLifeRing className="me-2" aria-hidden="true" /> Contacter le support
                 </Link>
               )}
             </div>
@@ -98,6 +99,18 @@ const ErrorComponent = ({
       </div>
     </div>
   );
+};
+
+// PropTypes pour la vérification des types
+ErrorComponent.propTypes = {
+  title: PropTypes.string,
+  code: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  message: PropTypes.string,
+  illustration: PropTypes.string,
+  children: PropTypes.node,
+  showHomeButton: PropTypes.bool,
+  showBackButton: PropTypes.bool,
+  showSupportButton: PropTypes.bool
 };
 
 export default ErrorComponent;

@@ -2,6 +2,7 @@
 // Menu déroulant (select) pour choisir une option parmi plusieurs (ex: liste d'exercices )
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Composant Select qui affiche un menu déroulant personnalisé
@@ -19,6 +20,7 @@ import React from 'react';
  * @param {string} props.helpText - Texte d'aide pour le champ
  * @param {React.ReactNode} props.children - Options du menu (éléments <option>)
  * @param {string} props.className - Classes CSS additionnelles
+ * @param {string} props.ariaDescribedby - ID de l'élément qui décrit ce champ
  */
 const Select = ({
   id,
@@ -33,14 +35,21 @@ const Select = ({
   helpText,
   children,
   className = '',
+  ariaDescribedby
 }) => {
+  // Générer des IDs uniques pour les éléments d'accessibilité
+  const errorId = error ? `${id}-error` : undefined;
+  const helpTextId = helpText ? `${id}-description` : undefined;
+  const describedBy = [ariaDescribedby, errorId, helpTextId].filter(Boolean).join(' ') || undefined;
+
   return (
     <div className={`mb-4 ${className}`}>
       {/* Label */}
       {label && (
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+          {required && <span className="sr-only">(obligatoire)</span>}
         </label>
       )}
       
@@ -66,7 +75,7 @@ const Select = ({
             focus:outline-none focus:ring-2
           `}
           aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={error ? `${id}-error` : helpText ? `${id}-description` : undefined}
+          aria-describedby={describedBy}
         >
           {children}
         </select>
@@ -110,19 +119,36 @@ const Select = ({
       
       {/* Message d'erreur */}
       {error && (
-        <p className="mt-1 text-sm text-red-600" id={`${id}-error`}>
+        <p className="mt-1 text-sm text-red-600" id={errorId}>
           {error}
         </p>
       )}
       
       {/* Texte d'aide */}
       {helpText && !error && (
-        <p className="mt-1 text-sm text-gray-500" id={`${id}-description`}>
+        <p className="mt-1 text-sm text-gray-500" id={helpTextId}>
           {helpText}
         </p>
       )}
     </div>
   );
+};
+
+// PropTypes pour la vérification des types
+Select.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.func,
+  label: PropTypes.string,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  helpText: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  ariaDescribedby: PropTypes.string
 };
 
 export default Select;

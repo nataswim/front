@@ -18,6 +18,8 @@ import PropTypes from 'prop-types';
  * @param {boolean} [props.hover=false] - Enable hover effect
  * @param {function} [props.onRowClick] - Row click handler
  * @param {string} [props.emptyMessage='No data available'] - Message when no data
+ * @param {string} [props.caption] - Table caption for accessibility
+ * @param {string} [props.summary] - Table summary for accessibility
  */
 const Table = ({
   columns,
@@ -26,7 +28,9 @@ const Table = ({
   striped = false,
   hover = false,
   onRowClick,
-  emptyMessage = 'No data available'
+  emptyMessage = 'No data available',
+  caption,
+  summary
 }) => {
   // Memoize columns and data processing
   const processedColumns = useMemo(() => columns.map(col => ({
@@ -73,14 +77,19 @@ const Table = ({
   };
 
   return (
-    <div className={`overflow-x-auto ${className}`}>
-      <table className="w-full text-left border-collapse">
+    <div className={`overflow-x-auto ${className}`} role="region" aria-label={caption || "Tableau de données"}>
+      <table 
+        className="w-full text-left border-collapse" 
+        summary={summary}
+      >
+        {caption && <caption className="sr-only">{caption}</caption>}
         <thead className="bg-gray-100 border-b">
           <tr>
             {processedColumns.map(col => (
               <th 
                 key={col.key} 
                 className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
+                scope="col"
               >
                 {col.title}
               </th>
@@ -107,7 +116,9 @@ Table.propTypes = {
   striped: PropTypes.bool,
   hover: PropTypes.bool,
   onRowClick: PropTypes.func,
-  emptyMessage: PropTypes.string
+  emptyMessage: PropTypes.string,
+  caption: PropTypes.string,
+  summary: PropTypes.string
 };
 
 export default Table;

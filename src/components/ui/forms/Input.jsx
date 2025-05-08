@@ -2,6 +2,7 @@
 // Champ de saisie de texte 
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Composant Input qui affiche un champ de saisie texte personnalisé
@@ -21,6 +22,7 @@ import React from 'react';
  * @param {string} props.helpText - Texte d'aide pour le champ
  * @param {Object} props.icon - Icône à afficher dans le champ (optionnel)
  * @param {string} props.className - Classes CSS additionnelles
+ * @param {string} props.ariaDescribedby - ID de l'élément qui décrit ce champ
  */
 const Input = ({
   id,
@@ -37,14 +39,21 @@ const Input = ({
   helpText,
   icon,
   className = '',
+  ariaDescribedby
 }) => {
+  // Générer des IDs uniques pour les éléments d'accessibilité
+  const errorId = error ? `${id}-error` : undefined;
+  const helpTextId = helpText ? `${id}-description` : undefined;
+  const describedBy = [ariaDescribedby, errorId, helpTextId].filter(Boolean).join(' ') || undefined;
+
   return (
     <div className={`mb-4 ${className}`}>
       {/* Label */}
       {label && (
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
+          {required && <span className="sr-only">(obligatoire)</span>}
         </label>
       )}
       
@@ -81,7 +90,7 @@ const Input = ({
             focus:outline-none focus:ring-2
           `}
           aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={error ? `${id}-error` : helpText ? `${id}-description` : undefined}
+          aria-describedby={describedBy}
         />
         
         {/* Indicateur d'erreur */}
@@ -106,19 +115,38 @@ const Input = ({
       
       {/* Message d'erreur */}
       {error && (
-        <p className="mt-1 text-sm text-red-600" id={`${id}-error`}>
+        <p className="mt-1 text-sm text-red-600" id={errorId}>
           {error}
         </p>
       )}
       
       {/* Texte d'aide */}
       {helpText && !error && (
-        <p className="mt-1 text-sm text-gray-500" id={`${id}-description`}>
+        <p className="mt-1 text-sm text-gray-500" id={helpTextId}>
           {helpText}
         </p>
       )}
     </div>
   );
+};
+
+// PropTypes pour la vérification des types
+Input.propTypes = {
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  type: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func.isRequired,
+  onBlur: PropTypes.func,
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  helpText: PropTypes.string,
+  icon: PropTypes.node,
+  className: PropTypes.string,
+  ariaDescribedby: PropTypes.string
 };
 
 export default Input;
