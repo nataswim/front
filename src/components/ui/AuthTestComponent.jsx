@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { FaUser, FaKey, FaCheck, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
 
@@ -12,7 +12,7 @@ const AuthTestComponent = () => {
   const [expanded, setExpanded] = useState(false);
   
   // Tester l'authentification
-  const testAuth = async () => {
+  const testAuth = useCallback(async () => {
     setLoading(true);
     
     try {
@@ -64,19 +64,21 @@ const AuthTestComponent = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   return (
     <div className="card my-4">
       <div className="card-header bg-light">
         <div className="d-flex justify-content-between align-items-center">
           <h3 className="h5 mb-0">
-            <FaUser className="me-2 text-primary" />
+            <FaUser className="me-2 text-primary" aria-hidden="true" />
             Test d'authentification
           </h3>
           <button 
             className="btn btn-sm btn-outline-secondary" 
             onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            aria-controls="auth-test-content"
           >
             {expanded ? 'Réduire' : 'Développer'}
           </button>
@@ -84,10 +86,10 @@ const AuthTestComponent = () => {
       </div>
       
       {expanded && (
-        <div className="card-body">
+        <div className="card-body" id="auth-test-content">
           <div className="alert alert-info">
             <p className="mb-0">
-              <FaKey className="me-2" />
+              <FaKey className="me-2" aria-hidden="true" />
               Ce composant permet de vérifier si vous êtes correctement authentifié auprès de l'API.
               L'accès aux données (exercices, séances, plans) nécessite une authentification valide.
             </p>
@@ -97,6 +99,7 @@ const AuthTestComponent = () => {
             className="btn btn-primary mb-4" 
             onClick={testAuth} 
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? (
               <>
@@ -105,22 +108,26 @@ const AuthTestComponent = () => {
               </>
             ) : (
               <>
-                <FaKey className="me-2" />
+                <FaKey className="me-2" aria-hidden="true" />
                 Tester l'authentification
               </>
             )}
           </button>
           
           {authStatus && (
-            <div className={`alert ${authStatus.authenticated ? 'alert-success' : 'alert-danger'}`}>
+            <div 
+              className={`alert ${authStatus.authenticated ? 'alert-success' : 'alert-danger'}`}
+              role="alert"
+              aria-live="polite"
+            >
               <h4 className="alert-heading">
                 {authStatus.authenticated ? (
                   <>
-                    <FaCheck className="me-2" /> Authentifié
+                    <FaCheck className="me-2" aria-hidden="true" /> Authentifié
                   </>
                 ) : (
                   <>
-                    <FaTimes className="me-2" /> Non authentifié
+                    <FaTimes className="me-2" aria-hidden="true" /> Non authentifié
                   </>
                 )}
               </h4>
@@ -151,7 +158,7 @@ const AuthTestComponent = () => {
           
           {authStatus && !authStatus.authenticated && (
             <div className="alert alert-warning mt-3">
-              <FaExclamationTriangle className="me-2" />
+              <FaExclamationTriangle className="me-2" aria-hidden="true" />
               <strong>Attention:</strong> Sans authentification valide, vous ne pourrez pas accéder aux données comme les exercices, séances et plans.
             </div>
           )}
@@ -161,4 +168,4 @@ const AuthTestComponent = () => {
   );
 };
 
-export default AuthTestComponent;
+export default React.memo(AuthTestComponent);

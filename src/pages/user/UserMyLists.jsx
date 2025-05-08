@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FaSwimmingPool, FaPlus, FaSearch, FaWater, FaSwimmer } from 'react-icons/fa';
-import axios from 'axios';
 import useAuth from '../../hooks/useAuth';
 import { getMylists } from '../../services/mylists';
 
@@ -65,10 +64,25 @@ const UserMyLists = () => {
    * 
    * 🇫🇷 Filtrer les listes en fonction du terme de recherche
    */
-  const filteredLists = mylists.filter(list => 
-    list.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (list.description && list.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredLists = useMemo(() => {
+    return mylists.filter(list => 
+      list.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (list.description && list.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [mylists, searchTerm]);
+
+  /**
+   * 🇬🇧 Format date for display
+   * 
+   * 🇫🇷 Formater la date pour l'affichage
+   */
+  const formatDate = useCallback((dateString) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }, []);
 
   return (
     <>
@@ -82,7 +96,7 @@ const UserMyLists = () => {
         <div className="d-flex justify-content-between align-items-center mb-4">
           <p>Mes Favoris</p>
           <Link to="/user/mylists/new" className="btn btn btn-success">
-            <FaPlus className="me-2" /> Ajouter Une Liste
+            <FaPlus className="me-2" aria-hidden="true" /> Ajouter Une Liste
           </Link>
         </div>
 
@@ -98,13 +112,14 @@ const UserMyLists = () => {
           <div className="card-body">
             {/* Barre de recherche */}
             <div className="input-group mb-3">
-              <span className="input-group-text"><FaSearch /></span>
+              <span className="input-group-text"><FaSearch aria-hidden="true" /></span>
               <input
                 type="text"
                 className="form-control"
                 placeholder="Rechercher une liste..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Rechercher une liste"
               />
             </div>
 
@@ -113,8 +128,8 @@ const UserMyLists = () => {
               🇫🇷 Affichage conditionnel selon l'état de chargement et la disponibilité des listes 
             */}
             {loading ? (
-              <div className="text-center py-5">
-                <div className="spinner-border text-primary" role="status">
+              <div className="text-center py-5" role="status" aria-live="polite">
+                <div className="spinner-border text-primary" aria-hidden="true">
                   <span className="visually-hidden">Chargement...</span>
                 </div>
                 <p className="mt-3">Chargement de vos listes personnelles...</p>
@@ -126,7 +141,7 @@ const UserMyLists = () => {
                     <div className="card h-100 hover-lift">
                       <div className="card-body">
                         <div className="d-flex align-items-center mb-3">
-                          <div className="rounded-circle bg-primary-subtle p-3 me-3">
+                          <div className="rounded-circle bg-primary-subtle p-3 me-3" aria-hidden="true">
                             <FaSwimmingPool className="text-primary" />
                           </div>
                           <h2 className="card-title h5 mb-0">{list.title}</h2>
@@ -149,7 +164,7 @@ const UserMyLists = () => {
                       </div>
                       <div className="card-footer bg-white">
                         <small className="text-muted">
-                          Créée le {new Date(list.created_at).toLocaleDateString()}
+                          Créée le {formatDate(list.created_at)}
                         </small>
                       </div>
                     </div>
@@ -159,14 +174,14 @@ const UserMyLists = () => {
             ) : (
               /* Message quand aucune liste n'est trouvée */
               <div className="text-center py-5">
-                <FaSwimmer className="text-muted fs-1 mb-3" />
+                <FaSwimmer className="text-muted fs-1 mb-3" aria-hidden="true" />
                 <p className="text-muted">
                   {searchTerm
                     ? "Aucune liste ne correspond à votre recherche."
                     : "Vous n'avez pas encore créé de liste personnelle."}
                 </p>
                 <Link to="/user/mylists/new" className="btn btn-primary">
-                  <FaPlus className="me-2" /> Créer ma première liste
+                  <FaPlus className="me-2" aria-hidden="true" /> Créer ma première liste
                 </Link>
               </div>
             )}
@@ -182,4 +197,4 @@ const UserMyLists = () => {
  * 
  * 🇫🇷 Exporter le composant pour l'utiliser dans l'application
  */
-export default UserMyLists;
+export default React.memo(UserMyLists);

@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import AdminHeader from "../components/admin/AdminHeader";
-//import AdminNav from "../components/navigation/AdminNav";
 import AdminFooter from "../components/admin/AdminFooter";
 import { Outlet } from "react-router-dom";
 
@@ -20,7 +19,9 @@ const AdminLayout = () => {
     <div className="user-layout">
       <AdminHeader />
       <div className="user-content">
-        <Outlet />
+        <main id="main-content" className="user-main">
+          <Outlet />
+        </main>
       </div>
       <AdminFooter />
     </div>

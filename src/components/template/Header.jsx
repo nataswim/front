@@ -5,6 +5,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
+  FaFacebook, 
+  FaTwitter, 
+  FaInstagram, 
+  FaYoutube, 
+  FaEnvelope, 
+  FaPhone, 
+  FaMapMarkerAlt, 
   FaBars, 
   FaTimes, 
   FaSearch, 
@@ -60,7 +67,7 @@ const Header = () => {
     }, 4000); // Change de logo toutes les 4 secondes
     
     return () => clearInterval(logoInterval);
-  }, []);
+  }, [logos.length]);
 
   // Gérer le scroll pour l'effet d'ombre
   useEffect(() => {
@@ -108,46 +115,43 @@ const Header = () => {
     {
       label: 'Fonctionnalités',
       to: '/fonctionnalites',
-      icon: <FaWater className="me-2" />
+      icon: <FaWater className="me-2" aria-hidden="true" />
     },
     {
       label: 'Découvrir',
-      icon: <FaWater className="me-2" />,
+      icon: <FaWater className="me-2" aria-hidden="true" />,
       subLinks: [
-        { to: '/plans-de-natation', label: 'Plans', icon: <FaSwimmer className="me-2" /> },
-        { to: '/seances-de-natation', label: 'Séances', icon: <FaSwimmer className="me-2" /> },
-        { to: '/educatifs-de-natation', label: 'Exercices', icon: <FaSwimmer className="me-2" /> }
+        { to: '/plans-de-natation', label: 'Plans', icon: <FaSwimmer className="me-2" aria-hidden="true" /> },
+        { to: '/seances-de-natation', label: 'Séances', icon: <FaSwimmer className="me-2" aria-hidden="true" /> },
+        { to: '/educatifs-de-natation', label: 'Exercices', icon: <FaSwimmer className="me-2" aria-hidden="true" /> }
       ]
     },
     {
       label: 'Infos',
       to: '/articles',
-      icon: <FaWater className="me-2" />
+      icon: <FaWater className="me-2" aria-hidden="true" />
     },
     {
       label: 'Outils',
       to: '/outils',
-      icon: <FaWater className="me-2" />
+      icon: <FaWater className="me-2" aria-hidden="true" />
     },
     {
       label: 'Utiliser',
       to: '/guide',
-      icon: <FaWater className="me-2" />
+      icon: <FaWater className="me-2" aria-hidden="true" />
     }
-
-    
-
   ];
 
   return (
-    <header className={`visitor-header ${scrolled ? 'shadow-sm sticky-top visitor-bg' : ''} transition-all duration-300`}>
-      <nav className="navbar navbar-expand-lg navbar-light">
+    <header className={`visitor-header ${scrolled ? 'shadow-sm sticky-top visitor-bg' : ''} transition-all duration-300`} role="banner">
+      <nav className="navbar navbar-expand-lg navbar-light" aria-label="Navigation principale">
         <div className="container">
           {/* Logo avec animation */}
-          <Link className="navbar-brand d-flex align-items-center" to="/">
+          <Link className="navbar-brand d-flex align-items-center" to="/" aria-label="Accueil NataSwim">
             <img 
               src={logos[currentLogoIndex]} 
-              alt={`NSAPP Logo ${currentLogoIndex + 1}`} 
+              alt="" 
               height="100"
               className="me-2"
               style={{ transition: 'opacity 0.5s ease-in-out' }}
@@ -159,12 +163,14 @@ const Header = () => {
             className="navbar-toggler border-0 shadow-none" 
             type="button" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           >
-            {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            {mobileMenuOpen ? <FaTimes size={20} aria-hidden="true" /> : <FaBars size={20} aria-hidden="true" />}
           </button>
 
           {/* Navigation principale */}
-          <div className={`collapse navbar-collapse ${mobileMenuOpen ? 'show' : ''}`}>
+          <div className={`collapse navbar-collapse ${mobileMenuOpen ? 'show' : ''}`} id="mainNavigation">
             <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
               {navLinks.map((link, index) => (
                 <li key={index} className={`nav-item ${link.subLinks ? 'dropdown' : ''} ${isActive(link.to) ? 'active' : ''}`}>
@@ -175,11 +181,15 @@ const Header = () => {
                         id={`dropdownMenu${index}`}
                         aria-expanded={openDropdown === index}
                         onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                        aria-haspopup="true"
                       >
                         {link.icon}
                         {link.label}
                       </button>
-                      <div className={`dropdown-menu shadow-sm rounded-3 border-0 ${openDropdown === index ? 'show' : ''}`}>
+                      <div 
+                        className={`dropdown-menu shadow-sm rounded-3 border-0 ${openDropdown === index ? 'show' : ''}`}
+                        aria-labelledby={`dropdownMenu${index}`}
+                      >
                         {link.subLinks.map((subLink, subIndex) => (
                           <Link
                             key={subIndex}
@@ -198,6 +208,7 @@ const Header = () => {
                       to={link.to}
                       className={`visitor-nav-link fw-medium d-flex align-items-center ${isActive(link.to) ? 'active' : ''}`}
                       onClick={handleMobileNavigation}
+                      aria-current={isActive(link.to) ? 'page' : undefined}
                     >
                       {link.icon}
                       {link.label}
@@ -219,17 +230,20 @@ const Header = () => {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    <FaUserCircle className="me-2" />
+                    <FaUserCircle className="me-2" aria-hidden="true" />
                     {user?.username || user?.email || 'Mon compte'}
                   </button>
-                  <ul className="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
+                  <ul 
+                    className="dropdown-menu dropdown-menu-end shadow-sm" 
+                    aria-labelledby="userDropdown"
+                  >
                     <li>
                       <Link 
                         to="/user/dashboard" 
                         className="dropdown-item d-flex align-items-center" 
                         onClick={handleMobileNavigation}
                       >
-                        <FaTachometerAlt className="me-2" /> Mon espace
+                        <FaTachometerAlt className="me-2" aria-hidden="true" /> Mon espace
                       </Link>
                     </li>
                     <li>
@@ -238,7 +252,7 @@ const Header = () => {
                         className="dropdown-item d-flex align-items-center" 
                         onClick={handleMobileNavigation}
                       >
-                        <FaUser className="me-2" /> Mon profil
+                        <FaUser className="me-2" aria-hidden="true" /> Mon profil
                       </Link>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
@@ -247,7 +261,7 @@ const Header = () => {
                         className="dropdown-item text-danger d-flex align-items-center" 
                         onClick={handleLogout}
                       >
-                        <FaSignOutAlt className="me-2" /> Déconnexion
+                        <FaSignOutAlt className="me-2" aria-hidden="true" /> Déconnexion
                       </button>
                     </li>
                   </ul>
@@ -259,14 +273,14 @@ const Header = () => {
                     className="btn btn-outline-primary btn-sm px-3 d-flex align-items-center"
                     onClick={handleMobileNavigation}
                   >
-                    <FaSignInAlt className="me-1" /> Connexion
+                    <FaSignInAlt className="me-1" aria-hidden="true" /> Connexion
                   </Link>
                   <Link 
                     to="/register" 
                     className="btn btn-primary btn-sm px-3 d-flex align-items-center"
                     onClick={handleMobileNavigation}
                   >
-                    <FaUserPlus className="me-1" /> S'inscrire
+                    <FaUserPlus className="me-1" aria-hidden="true" /> S'inscrire
                   </Link>
                 </div>
               )}
@@ -278,7 +292,7 @@ const Header = () => {
       {/* Barre de recherche mobile */}
       <div className={`bg-light py-2 d-lg-none ${mobileMenuOpen ? 'd-block' : 'd-none'}`}>
         <div className="container">
-          <form onSubmit={handleSearch} className="d-flex">
+          <form onSubmit={handleSearch} className="d-flex" role="search">
             <div className="input-group">
               <input 
                 type="text" 
@@ -288,8 +302,8 @@ const Header = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 aria-label="Rechercher"
               />
-              <button className="btn btn-outline-primary" type="submit">
-                <FaSearch />
+              <button className="btn btn-outline-primary" type="submit" aria-label="Lancer la recherche">
+                <FaSearch aria-hidden="true" />
               </button>
             </div>
           </form>

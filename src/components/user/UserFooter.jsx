@@ -18,7 +18,7 @@ const UserFooter = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="user-footer text-white pt-5 pb-4">
+    <footer className="user-footer text-white pt-5 pb-4" role="contentinfo">
       <div className="container">
         <div className="row">
           {/* Colonne Logo & Description */}
@@ -28,17 +28,17 @@ const UserFooter = () => {
               Plateforme innovante dédiée aux nageurs et coachs pour optimiser leurs performances et suivre leur progression dans l'eau.
             </p>
             <div className="d-flex gap-3 mb-4">
-              <a href="https://facebook.com" className="text-white" target="_blank" rel="noopener noreferrer">
-                <FaFacebook size={20} />
+              <a href="https://facebook.com" className="text-white" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <FaFacebook size={20} aria-hidden="true" />
               </a>
-              <a href="https://twitter.com" className="text-white" target="_blank" rel="noopener noreferrer">
-                <FaTwitter size={20} />
+              <a href="https://twitter.com" className="text-white" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                <FaTwitter size={20} aria-hidden="true" />
               </a>
-              <a href="https://instagram.com" className="text-white" target="_blank" rel="noopener noreferrer">
-                <FaInstagram size={20} />
+              <a href="https://instagram.com" className="text-white" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <FaInstagram size={20} aria-hidden="true" />
               </a>
-              <a href="https://youtube.com" className="text-white" target="_blank" rel="noopener noreferrer">
-                <FaYoutube size={20} />
+              <a href="https://youtube.com" className="text-white" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <FaYoutube size={20} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -76,7 +76,7 @@ const UserFooter = () => {
                 <Link to="/cookies" className="text-white text-decoration-none">Cookies & Données</Link>
               </li>
               <li className="mb-2">
-                <Link to="/declaration-Accessibilite" className="text-white text-decoration-none"> Accessibilité</Link>
+                <Link to="/declaration-Accessibilite" className="text-white text-decoration-none">Accessibilité</Link>
               </li>
             </ul>
           </div>
@@ -85,16 +85,16 @@ const UserFooter = () => {
           <div className="col-md-4 mb-4">
             <h6 className="text-uppercase fw-bold mb-4">Contact</h6>
             <p className="mb-2">
-              <FaMapMarkerAlt className="me-2" />
+              <FaMapMarkerAlt className="me-2" aria-hidden="true" />
               45 Avenue Albert Camus, 75000 Paris, France
             </p>
             <p className="mb-2">
-              <FaEnvelope className="me-2" />
-              contact@nataswim.net
+              <FaEnvelope className="me-2" aria-hidden="true" />
+              <a href="mailto:contact@nataswim.net" className="text-white">contact@nataswim.net</a>
             </p>
             <p className="mb-2">
-              <FaPhone className="me-2" />
-              +33 6 44 24 87 11
+              <FaPhone className="me-2" aria-hidden="true" />
+              <a href="tel:+33644248711" className="text-white">+33 6 44 24 87 11</a>
             </p>
           </div>
         </div>
@@ -113,10 +113,10 @@ const UserFooter = () => {
                   <Link to="/politique-confidentialite" className="text-white small">⚖️ Politique de confidentialité</Link>
                 </li>
                 <li className="list-inline-item ms-3">
-                <Link    to="https://www.nataswim.com/"    className="text-white small"    target="_blank"    rel="noopener noreferrer" >🥇 Sport NeT Systèmes SNS </Link>
+                <Link to="https://www.nataswim.com/" className="text-white small" target="_blank" rel="noopener noreferrer">🥇 Sport NeT Systèmes SNS </Link>
                 </li>
                 <li className="list-inline-item ms-3">
-                <Link    to="https://nataswimshop.com/"    className="text-white small"    target="_blank"    rel="noopener noreferrer" >💙 Sport Boutique </Link>
+                <Link to="https://nataswimshop.com/" className="text-white small" target="_blank" rel="noopener noreferrer">💙 Sport Boutique </Link>
                 </li>
               </ul>
             </div>

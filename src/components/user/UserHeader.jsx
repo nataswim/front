@@ -75,17 +75,18 @@ const UserHeader = () => {
   }
 
   return (
-    <header className="user-header">
+    <header className="user-header" role="banner">
       <div className="container-fluid">
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" aria-label="Navigation utilisateur">
       <div className="container-fluid px-4">
         <Link to={isAdmin() ? "/admin" : "/user"} className="navbar-brand">
           <img
             src="/assets/images/logo/nataswim_app_logo_4.png"
-            alt="Logo Site"
-            height="120" // Ajustez la hauteur du logo
+            alt=""
+            height="120"
             className="logo-wrapper"
           />
+          <span className="visually-hidden">Accueil espace utilisateur</span>
         </Link>
         <button
           className="navbar-toggler"
@@ -94,7 +95,7 @@ const UserHeader = () => {
           data-bs-target="#userHeaderNavbar"
           aria-controls="userHeaderNavbar"
           aria-expanded={isMobileMenuOpen}
-          aria-label="Toggle navigation"
+          aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <span className="navbar-toggler-icon"></span>
@@ -117,17 +118,22 @@ const UserHeader = () => {
                       data-bs-toggle="dropdown"
                       aria-expanded={openDropdown === index}
                       onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                      aria-haspopup="true"
                     >
-                      <i className={`bi ${link.icon} me-2`}></i>
+                      <i className={`bi ${link.icon} me-2`} aria-hidden="true"></i>
                       {link.label}
                     </button>
-                    <ul className="dropdown-menu">
+                    <ul 
+                      className="dropdown-menu" 
+                      aria-labelledby={`dropdownMenu${index}`}
+                    >
                       {link.subLinks.map((subLink, subIndex) => (
                         <li key={subIndex}>
                           <Link
                             to={subLink.to}
                             className={`dropdown-user ${isActive(subLink.to)}`}
                             onClick={() => setIsMobileMenuOpen(false)}
+                            aria-current={isActive(subLink.to) ? 'page' : undefined}
                           >
                             {subLink.label}
                           </Link>
@@ -140,8 +146,9 @@ const UserHeader = () => {
                     to={link.to}
                     className={`nav-link d-flex align-items-center ${isActive(link.to)}`}
                     onClick={() => setIsMobileMenuOpen(false)}
+                    aria-current={isActive(link.to) ? 'page' : undefined}
                   >
-                    <i className={`bi ${link.icon} me-2`}></i>
+                    <i className={`bi ${link.icon} me-2`} aria-hidden="true"></i>
                     {link.label}
                   </Link>
                 )}
@@ -159,7 +166,7 @@ const UserHeader = () => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <i className="bi bi-person-circle me-2"></i>
+                <i className="bi bi-person-circle me-2" aria-hidden="true"></i>
                 {user?.username || user?.email}
               </button>
               <ul className="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
@@ -169,7 +176,7 @@ const UserHeader = () => {
                     className="dropdown-item d-flex align-items-center"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <i className="bi bi-person me-2"></i> Profil
+                    <i className="bi bi-person me-2" aria-hidden="true"></i> Profil
                   </Link>
                 </li>
                 {isAdmin() && (
@@ -179,7 +186,7 @@ const UserHeader = () => {
                       className="dropdown-item d-flex align-items-center"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <i className="bi bi-shield-lock me-2"></i> Administration
+                      <i className="bi bi-shield-lock me-2" aria-hidden="true"></i> Administration
                     </Link>
                   </li>
                 )}
@@ -188,7 +195,7 @@ const UserHeader = () => {
                     onClick={handleLogout}
                     className="dropdown-item text-danger d-flex align-items-center"
                   >
-                    <i className="bi bi-box-arrow-right me-2"></i> Déconnexion
+                    <i className="bi bi-box-arrow-right me-2" aria-hidden="true"></i> Déconnexion
                   </button>
                 </li>
               </ul>

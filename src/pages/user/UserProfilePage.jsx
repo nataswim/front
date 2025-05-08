@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaUser, 
@@ -102,38 +102,38 @@ const UserProfilePage = () => {
   }, [authUser]);
 
   // Gérer le changement de champ
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setEditedUser({
-      ...editedUser,
+    setEditedUser(prev => ({
+      ...prev,
       [name]: value
-    });
-  };
+    }));
+  }, []);
 
   // Sauvegarder les modifications
-  const handleSave = (e) => {
+  const handleSave = useCallback((e) => {
     e.preventDefault();
     setUser({...editedUser});
     setIsEditing(false);
     setSuccessMessage("Profil mis à jour avec succès !");
     setTimeout(() => setSuccessMessage(""), 3000);
-  };
+  }, [editedUser]);
 
   // Annuler l'édition
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditedUser({...user});
     setIsEditing(false);
-  };
+  }, [user]);
 
   // Formater une date (YYYY-MM-DD -> DD/MM/YYYY)
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return 'Non renseigné';
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('fr-FR').format(date);
-  };
+  }, []);
   
   // Formater une date avec l'heure
-  const formatDateTime = (dateString) => {
+  const formatDateTime = useCallback((dateString) => {
     if (!dateString) return 'Non renseigné';
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('fr-FR', {
@@ -143,23 +143,23 @@ const UserProfilePage = () => {
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
-  };
+  }, []);
 
   return (
     <>
       <main className="container py-5">
         {successMessage && (
-          <div className="alert alert-success alert-dismissible fade show" role="alert">
+          <div className="alert alert-success alert-dismissible fade show" role="alert" aria-live="polite">
             {successMessage}
-            <button type="button" className="btn-close" onClick={() => setSuccessMessage("")} aria-label="Close"></button>
+            <button type="button" className="btn-close" onClick={() => setSuccessMessage("")} aria-label="Fermer"></button>
           </div>
         )}
         
         <h1 className="title-swim">Mon Profil</h1>
         
         {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-secondary" role="status">
+          <div className="text-center py-5" role="status" aria-live="polite">
+            <div className="spinner-border text-secondary" aria-hidden="true">
               <span className="visually-hidden">Chargement...</span>
             </div>
             <p className="mt-3">Chargement de vos données...</p>
@@ -173,7 +173,7 @@ const UserProfilePage = () => {
                   <div className="text-center mb-4">
                     <div className="position-relative d-inline-block">
                       {/* Avatar utilisateur */}
-                      <div className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '120px', height: '120px', fontSize: '3rem' }}>
+                      <div className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '120px', height: '120px', fontSize: '3rem' }} aria-hidden="true">
                         {user.firstName?.charAt(0) || ''}{user.lastName?.charAt(0) || ''}
                       </div>
                       {!isEditing && (
@@ -182,14 +182,14 @@ const UserProfilePage = () => {
                           onClick={() => setIsEditing(true)}
                           aria-label="Modifier le profil"
                         >
-                          <FaEdit />
+                          <FaEdit aria-hidden="true" />
                         </button>
                       )}
                     </div>
                     <h2 className="h4 fw-bold mb-1">{user.firstName} {user.lastName}</h2>
                     <p className="text-muted mb-2">@{user.username}</p>
                     <div className="d-flex align-items-center justify-content-center mb-3">
-                      <FaCalendarAlt className="text-secondary me-2 small" />
+                      <FaCalendarAlt className="text-secondary me-2 small" aria-hidden="true" />
                       <p className="text-muted small mb-0">
                         Membre depuis {formatDate(user.createdAt)}
                       </p>
@@ -236,7 +236,7 @@ const UserProfilePage = () => {
                       </div>
                       <div className="d-flex gap-2">
                         <button type="submit" className="btn btn-primary d-flex align-items-center">
-                          <FaSave className="me-2" /> Enregistrer
+                          <FaSave className="me-2" aria-hidden="true" /> Enregistrer
                         </button>
                         <button type="button" className="btn btn-outline-secondary" onClick={handleCancel}>
                           Annuler
@@ -247,12 +247,12 @@ const UserProfilePage = () => {
                     <div>
                       <div className="mb-4">
                         <h3 className="h5 fw-bold mb-3 border-bottom pb-2">
-                          <FaIdCard className="text-secondary me-2" />
+                          <FaIdCard className="text-secondary me-2" aria-hidden="true" />
                           Informations personnelles
                         </h3>
                         <ul className="list-unstyled">
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaUser className="text-secondary" />
                             </div>
                             <div>
@@ -261,7 +261,7 @@ const UserProfilePage = () => {
                             </div>
                           </li>
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaUser className="text-secondary" />
                             </div>
                             <div>
@@ -270,7 +270,7 @@ const UserProfilePage = () => {
                             </div>
                           </li>
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaEnvelope className="text-secondary" />
                             </div>
                             <div>
@@ -279,7 +279,7 @@ const UserProfilePage = () => {
                             </div>
                           </li>
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaUser className="text-secondary" />
                             </div>
                             <div>
@@ -288,7 +288,7 @@ const UserProfilePage = () => {
                             </div>
                           </li>
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaCalendarAlt className="text-secondary" />
                             </div>
                             <div>
@@ -297,7 +297,7 @@ const UserProfilePage = () => {
                             </div>
                           </li>
                           <li className="d-flex align-items-center mb-3">
-                            <div className="bg-light rounded-circle p-2 me-3">
+                            <div className="bg-light rounded-circle p-2 me-3" aria-hidden="true">
                               <FaCalendarCheck className="text-secondary" />
                             </div>
                             <div>
@@ -319,13 +319,13 @@ const UserProfilePage = () => {
                 <div className="col-12">
                   <div className="card shadow-sm">
                     <div className="card-header bg-primary bg-gradient text-white">
-                    <h3 className="h3 mb-2"><FaWater className="me-2" /> Ressources</h3>
+                    <h3 className="h3 mb-2"><FaWater className="me-2" aria-hidden="true" /> Ressources</h3>
                     </div>
                     <div className="card-body">
                       <div className="row text-center">
                         <div className="col-6 col-md-3 mb-3">
                           <Link to="/user/workouts" className="text-decoration-none">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }}>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }} aria-hidden="true">
                               <FaSwimmer className="text-secondary fs-3" />
                             </div>
                             <p className="small text-muted mb-0">Séances</p>
@@ -333,7 +333,7 @@ const UserProfilePage = () => {
                         </div>
                         <div className="col-6 col-md-3 mb-3">
                           <Link to="/user/exercises" className="text-decoration-none">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }}>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }} aria-hidden="true">
                               <FaDumbbell className="text-secondary fs-3" />
                             </div>
                             <p className="small text-muted mb-0">Exercices</p>
@@ -341,7 +341,7 @@ const UserProfilePage = () => {
                         </div>
                         <div className="col-6 col-md-3 mb-3">
                           <Link to="/user/plans" className="text-decoration-none">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }}>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }} aria-hidden="true">
                               <FaCalendarAlt className="text-secondary fs-3" />
                             </div>
                             <p className="small text-muted mb-0">Plans</p>
@@ -349,7 +349,7 @@ const UserProfilePage = () => {
                         </div>
                         <div className="col-6 col-md-3 mb-3">
                           <Link to="/user/mylists" className="text-decoration-none">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }}>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style={{ width: '70px', height: '70px' }} aria-hidden="true">
                               <FaListUl className="text-secondary fs-3" />
                             </div>
                             <p className="small text-muted mb-0">Listes</p>
@@ -367,7 +367,7 @@ const UserProfilePage = () => {
                   <div className="card shadow-sm">
                     <div className="card-header bg-primary bg-gradient text-white">
                     <h3 className="h3 mb-2">
-                        <FaWater className="me-2" /> Mon Compte
+                        <FaWater className="me-2" aria-hidden="true" /> Mon Compte
                       </h3>
                     </div>
                     <div className="card-body">
@@ -377,15 +377,39 @@ const UserProfilePage = () => {
                           <form>
                             <div className="mb-3">
                               <label htmlFor="current-password" className="form-label">Mot de passe actuel</label>
-                              <input type="password" className="form-control" id="current-password" />
+                              <input 
+                                type="password" 
+                                className="form-control" 
+                                id="current-password" 
+                                aria-describedby="current-password-help"
+                              />
+                              <div id="current-password-help" className="form-text">
+                                Entrez votre mot de passe actuel pour confirmer votre identité
+                              </div>
                             </div>
                             <div className="mb-3">
                               <label htmlFor="new-password" className="form-label">Nouveau mot de passe</label>
-                              <input type="password" className="form-control" id="new-password" />
+                              <input 
+                                type="password" 
+                                className="form-control" 
+                                id="new-password" 
+                                aria-describedby="new-password-help"
+                              />
+                              <div id="new-password-help" className="form-text">
+                                Utilisez au moins 8 caractères avec des lettres, chiffres et symboles
+                              </div>
                             </div>
                             <div className="mb-3">
                               <label htmlFor="confirm-password" className="form-label">Confirmer le mot de passe</label>
-                              <input type="password" className="form-control" id="confirm-password" />
+                              <input 
+                                type="password" 
+                                className="form-control" 
+                                id="confirm-password" 
+                                aria-describedby="confirm-password-help"
+                              />
+                              <div id="confirm-password-help" className="form-text">
+                                Répétez votre nouveau mot de passe pour confirmation
+                              </div>
                             </div>
                             <div className="d-flex gap-2">
                               <button type="submit" className="btn btn-primary">Modifier le mot de passe</button>
@@ -393,15 +417,25 @@ const UserProfilePage = () => {
                             </div>
                           </form>
                         ) : (
-                          <button className="btn btn-outline-primary" onClick={() => setShowPassword(true)}>
+                          <button 
+                            className="btn btn-outline-primary" 
+                            onClick={() => setShowPassword(true)}
+                            aria-expanded={showPassword}
+                            aria-controls="password-form"
+                          >
                             Changer le mot de passe
                           </button>
                         )}
                       </div>
                       
                       <div className="mt-4 pt-4 border-top">
-                        <button className="btn btn-outline-danger d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                          <FaTrashAlt className="me-2" /> Supprimer mon compte
+                        <button 
+                          className="btn btn-outline-danger d-flex align-items-center" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#deleteAccountModal"
+                          aria-label="Supprimer mon compte"
+                        >
+                          <FaTrashAlt className="me-2" aria-hidden="true" /> Supprimer mon compte
                         </button>
                       </div>
                     </div>
@@ -415,7 +449,7 @@ const UserProfilePage = () => {
                   <div className="card shadow-sm">
                     <div className="card-header bg-primary bg-gradient text-white">
                       <h3 className="h3 mb-2">
-                        <FaWater className="me-2" /> Outils
+                        <FaWater className="me-2" aria-hidden="true" /> Outils
                       </h3>
                     </div>
                     <div className="card-body">
@@ -434,25 +468,25 @@ const UserProfilePage = () => {
                           <ul className="list-group mb-4">
                             <li className="list-group-item">
                               <Link to="/outils/prediction-performance-natation" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaChartLine className="text-secondary me-2" />
+                                <FaChartLine className="text-secondary me-2" aria-hidden="true" />
                                 <span>Prédiction Performance Natation</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/chronometre-groupe" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaStopwatch className="text-secondary me-2" />
+                                <FaStopwatch className="text-secondary me-2" aria-hidden="true" />
                                 <span>Chronomètre de Groupe</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/planificateur-natation" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaSwimmer className="text-secondary me-2" />
+                                <FaSwimmer className="text-secondary me-2" aria-hidden="true" />
                                 <span>Planificateur Natation</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/planificateur-triathlon" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaRunning className="text-secondary me-2" />
+                                <FaRunning className="text-secondary me-2" aria-hidden="true" />
                                 <span>Planificateur Triathlon</span>
                               </Link>
                             </li>
@@ -462,7 +496,7 @@ const UserProfilePage = () => {
                           <ul className="list-group mb-4">
                             <li className="list-group-item">
                               <Link to="/outils/planificateur-course" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaRunning className="text-secondary me-2" />
+                                <FaRunning className="text-secondary me-2" aria-hidden="true" />
                                 <span>Planificateur Course à pied</span>
                               </Link>
                             </li>
@@ -474,49 +508,49 @@ const UserProfilePage = () => {
                           <ul className="list-group">
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-charge-maximale" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaDumbbell className="text-secondary me-2" />
+                                <FaDumbbell className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur de Charge Maximale (1RM)</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-calories-sport" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaCalculator className="text-secondary me-2" />
+                                <FaCalculator className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur de Besoins Caloriques</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/convertisseur-kcal-macros" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaDrumstickBite className="text-secondary me-2" />
+                                <FaDrumstickBite className="text-secondary me-2" aria-hidden="true" />
                                 <span>Convertisseur kcal/macros</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-imc" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaWeight className="text-secondary me-2" />
+                                <FaWeight className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur d'IMC</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-tdee" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaTachometerAlt className="text-secondary me-2" />
+                                <FaTachometerAlt className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur TDEE</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-masse-grasse" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaWeight className="text-secondary me-2" />
+                                <FaWeight className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur Masse Grasse</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-hydratation" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaWater className="text-secondary me-2" />
+                                <FaWater className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur d'Hydratation</span>
                               </Link>
                             </li>
                             <li className="list-group-item">
                               <Link to="/outils/calculateur-fc-zones" className="text-decoration-none text-dark d-flex align-items-center">
-                                <FaHeartbeat className="text-secondary me-2" />
+                                <FaHeartbeat className="text-secondary me-2" aria-hidden="true" />
                                 <span>Calculateur FC par zone</span>
                               </Link>
                             </li>
@@ -538,13 +572,21 @@ const UserProfilePage = () => {
           <div className="modal-content">
             <div className="modal-header bg-danger text-white">
               <h5 className="modal-title" id="deleteAccountModalLabel">Confirmer la suppression</h5>
-              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div className="modal-body">
               <p>Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et toutes vos données seront perdues.</p>
               <div className="mb-3">
                 <label htmlFor="confirm-delete" className="form-label">Tapez "SUPPRIMER" pour confirmer</label>
-                <input type="text" className="form-control" id="confirm-delete" />
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  id="confirm-delete" 
+                  aria-describedby="delete-confirmation-help"
+                />
+                <div id="delete-confirmation-help" className="form-text">
+                  Veuillez saisir exactement le mot SUPPRIMER en majuscules pour confirmer la suppression
+                </div>
               </div>
             </div>
             <div className="modal-footer">
@@ -559,4 +601,4 @@ const UserProfilePage = () => {
   );
 };
 
-export default UserProfilePage;
+export default React.memo(UserProfilePage);

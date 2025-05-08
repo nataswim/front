@@ -4,7 +4,6 @@
 // <Alerte type="avertissement" message="Avertissement : Une action est requise." />
 // <Alerte message="Message d'information par défaut" />
 
-
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -14,11 +13,15 @@ import PropTypes from 'prop-types';
  * @param {string} props.type - Type of alert (success, error, warning, info)
  * @param {string} props.message - Message to be displayed
  * @param {string} [props.className] - Additional CSS classes
+ * @param {boolean} [props.dismissible] - Whether the alert can be dismissed
+ * @param {function} [props.onDismiss] - Function to call when alert is dismissed
  */
 const Alert = ({ 
   type = 'info', 
   message, 
-  className = '' 
+  className = '',
+  dismissible = false,
+  onDismiss
 }) => {
   // Define alert type styles
   const alertStyles = {
@@ -31,6 +34,14 @@ const Alert = ({
   // Validate alert type
   const alertType = Object.keys(alertStyles).includes(type) ? type : 'info';
 
+  // Map alert types to ARIA roles
+  const alertRoles = {
+    success: 'status',
+    error: 'alert',
+    warning: 'alert',
+    info: 'status'
+  };
+
   return (
     <div 
       className={`
@@ -38,18 +49,31 @@ const Alert = ({
         ${alertStyles[alertType]} 
         ${className}
       `} 
-      role="alert"
+      role={alertRoles[alertType]}
+      aria-live={alertType === 'error' || alertType === 'warning' ? 'assertive' : 'polite'}
     >
       <span className="block sm:inline">{message}</span>
+      {dismissible && (
+        <button
+          type="button"
+          className="absolute top-0 right-0 p-2"
+          onClick={onDismiss}
+          aria-label="Fermer"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      )}
     </div>
   );
 };
 
 // PropTypes for type checking
 Alert.propTypes = {
-    type: PropTypes.oneOf(['succes', 'erreur', 'avertissement', 'info']),
+  type: PropTypes.oneOf(['success', 'error', 'warning', 'info']),
   message: PropTypes.string.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
+  dismissible: PropTypes.bool,
+  onDismiss: PropTypes.func
 };
 
 export default Alert;

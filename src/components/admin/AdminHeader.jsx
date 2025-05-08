@@ -89,49 +89,52 @@ const AdminHeader = () => {
     {
       label: 'Utilisateurs',
       to: '/admin/users',
-      icon: <FaUsers className="me-2" />
+      icon: <FaUsers className="me-2" aria-hidden="true" />
     },
     {
       label: 'Exercices',
       to: '/admin/exercises',
-      icon: <FaWater className="me-2" />
+      icon: <FaWater className="me-2" aria-hidden="true" />
     },
     {
       label: 'Séances',
       to: '/admin/workouts',
-      icon: <FaSwimmer className="me-2" />
+      icon: <FaSwimmer className="me-2" aria-hidden="true" />
     },
     {
       label: 'Plans',
       to: '/admin/plans',
-      icon: <FaCalendarCheck className="me-2" />
+      icon: <FaCalendarCheck className="me-2" aria-hidden="true" />
     },
     {
       label: 'Séries',
       to: '/admin/swim-sets',
-      icon: <FaList className="me-2" />
+      icon: <FaList className="me-2" aria-hidden="true" />
     },
     {
       label: 'Pages',
       to: '/admin/pages',
-      icon: <FaFileAlt className="me-2" />
+      icon: <FaFileAlt className="me-2" aria-hidden="true" />
     },
     {
       label: 'Médias',
       to: '/admin/uploads',
-      icon: <FaImages className="me-2" />
+      icon: <FaImages className="me-2" aria-hidden="true" />
     }
   ];
 
   return (
-    <header className={`admin-header ${scrolled ? 'shadow-sm sticky-top' : ''} transition-all duration-300`}>
-      <nav className="navbar navbar-expand-lg navbar-dark">
+    <header 
+      className={`admin-header ${scrolled ? 'shadow-sm sticky-top' : ''} transition-all duration-300`}
+      role="banner"
+    >
+      <nav className="navbar navbar-expand-lg navbar-dark" aria-label="Navigation administration">
         <div className="container-fluid">
           {/* Logo et titre */}
-          <Link className="navbar-brand d-flex align-items-center" to="/admin">
+          <Link className="navbar-brand d-flex align-items-center" to="/admin" aria-label="Accueil administration">
             <img 
               src="/assets/images/logo/nataswim_app_logo_4.png" 
-              alt="Logo Administration" 
+              alt=""
               height="100"
               className="admin-logo-wrapper"
             />
@@ -142,12 +145,15 @@ const AdminHeader = () => {
             className="navbar-toggler border-0 shadow-none" 
             type="button" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-controls="adminNavbar"
           >
-            {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            {mobileMenuOpen ? <FaTimes size={20} aria-hidden="true" /> : <FaBars size={20} aria-hidden="true" />}
           </button>
 
           {/* Navigation principale */}
-          <div className={`collapse navbar-collapse ${mobileMenuOpen ? 'show' : ''}`}>
+          <div className={`collapse navbar-collapse ${mobileMenuOpen ? 'show' : ''}`} id="adminNavbar">
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
               {navLinks.map((link, index) => (
                 <li key={index} className={`nav-item ${isActive(link.to) ? 'active' : ''}`}>
@@ -155,6 +161,7 @@ const AdminHeader = () => {
                     to={link.to}
                     className={`admin-nav-link admin-menu-item fw-medium d-flex align-items-center ${isActive(link.to) ? 'active' : ''}`}
                     onClick={handleMobileNavigation}
+                    aria-current={isActive(link.to) ? 'page' : undefined}
                   >
                     {link.icon}
                     {link.label}
@@ -173,7 +180,7 @@ const AdminHeader = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <FaUserCircle className="me-2" />
+                  <FaUserCircle className="me-2" aria-hidden="true" />
                   {user?.name || user?.email || 'Admin'}
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminUserDropdown">
@@ -183,7 +190,7 @@ const AdminHeader = () => {
                       className="dropdown-item d-flex align-items-center" 
                       onClick={handleMobileNavigation}
                     >
-                      <FaTachometerAlt className="me-2" /> Tableau de bord
+                      <FaTachometerAlt className="me-2" aria-hidden="true" /> Tableau de bord
                     </Link>
                   </li>
                   <li>
@@ -192,7 +199,7 @@ const AdminHeader = () => {
                       className="dropdown-item d-flex align-items-center" 
                       onClick={handleMobileNavigation}
                     >
-                      <FaUser className="me-2" /> Mon profil
+                      <FaUser className="me-2" aria-hidden="true" /> Mon profil
                     </Link>
                   </li>
                   <li><hr className="dropdown-divider" /></li>
@@ -201,7 +208,7 @@ const AdminHeader = () => {
                       className="dropdown-item text-danger d-flex align-items-center" 
                       onClick={handleLogout}
                     >
-                      <FaSignOutAlt className="me-2" /> Déconnexion
+                      <FaSignOutAlt className="me-2" aria-hidden="true" /> Déconnexion
                     </button>
                   </li>
                 </ul>
@@ -212,7 +219,7 @@ const AdminHeader = () => {
       </nav>
 
       {/* Menu mobile - Affichage uniquement sur mobile */}
-      <div className={`admin-mobile-menu d-lg-none ${mobileMenuOpen ? 'd-block' : 'd-none'}`}>
+      <div className={`admin-mobile-menu d-lg-none ${mobileMenuOpen ? 'd-block' : 'd-none'}`} aria-label="Menu mobile">
         <div className="container-fluid">
           <ul className="list-unstyled mb-0">
             {navLinks.map((link, index) => (
@@ -221,6 +228,7 @@ const AdminHeader = () => {
                   to={link.to}
                   className={`d-flex align-items-center text-white text-decoration-none p-2 rounded ${isActive(link.to) ? 'bg-primary' : ''}`}
                   onClick={handleMobileNavigation}
+                  aria-current={isActive(link.to) ? 'page' : undefined}
                 >
                   {link.icon}
                   {link.label}

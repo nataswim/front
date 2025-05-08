@@ -1,7 +1,7 @@
 // WorkoutsPage.jsx 
 // //Pages accessibles après connexion 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaFilter, 
@@ -14,7 +14,6 @@ import {
   FaSwimmer,
   FaTint
 } from 'react-icons/fa';
-import Footer from '../../../components/template/Footer';
 import { getWorkouts } from '../../../services/workouts';
 import axios from 'axios';
 
@@ -98,32 +97,38 @@ const UserWorkoutsPage = () => {
     fetchWorkouts();
   }, []);
 
-  // Filtrer les séances
-  const filteredWorkouts = workoutsWithStats.filter(workout => {
-    const matchesSearch = workout.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || workout.workout_category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  // Filtrer les séances - mémoïsé pour éviter des recalculs inutiles
+  const filteredWorkouts = useMemo(() => {
+    return workoutsWithStats.filter(workout => {
+      const matchesSearch = workout.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (workout.description && workout.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = categoryFilter === 'all' || workout.workout_category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [workoutsWithStats, searchTerm, categoryFilter]);
 
-  // Pagination
-  const pageCount = Math.ceil(filteredWorkouts.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentWorkouts = filteredWorkouts.slice(offset, offset + itemsPerPage);
+  // Pagination - mémoïsé pour éviter des recalculs inutiles
+  const paginationData = useMemo(() => {
+    const pageCount = Math.ceil(filteredWorkouts.length / itemsPerPage);
+    const offset = currentPage * itemsPerPage;
+    const currentWorkouts = filteredWorkouts.slice(offset, offset + itemsPerPage);
+    return { pageCount, currentWorkouts };
+  }, [filteredWorkouts, currentPage, itemsPerPage]);
 
   /**
    * 🇬🇧 Format distance with appropriate units
    * 
    * 🇫🇷 Formater la distance avec les unités appropriées
    */
-  const formatDistance = (meters) => {
+  const formatDistance = useCallback((meters) => {
     if (meters >= 1000) {
       return `${(meters/1000).toFixed(1)} km`;
     }
     return `${meters} m`;
-  };
+  }, []);
 
   // Obtenir la couleur du badge selon la catégorie
-  const getCategoryBadgeColor = (category) => {
+  const getCategoryBadgeColor = useCallback((category) => {
     switch (category) {
       case 'Aero 1': return 'success';
       case 'Vitesse': return 'danger';
@@ -132,14 +137,14 @@ const UserWorkoutsPage = () => {
       case 'Mixte': return 'purple';
       default: return 'secondary';
     }
-  };
+  }, []);
 
   if (loading) {
     return (
       <>
         <main className="container py-4">
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
+          <div className="text-center" role="status" aria-live="polite">
+            <div className="spinner-border text-primary" aria-hidden="true">
               <span className="visually-hidden">Chargement...</span>
             </div>
           </div>
@@ -169,7 +174,7 @@ const UserWorkoutsPage = () => {
               <div className="col-md-6">
                 <div className="input-group">
                   <span className="input-group-text bg-light">
-                    <FaSearch />
+                    <FaSearch aria-hidden="true" />
                   </span>
                   <input
                     type="text"
@@ -177,18 +182,20 @@ const UserWorkoutsPage = () => {
                     placeholder="Rechercher une séance..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Rechercher une séance"
                   />
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="input-group">
                   <span className="input-group-text bg-light">
-                    <FaFilter />
+                    <FaFilter aria-hidden="true" />
                   </span>
                   <select
                     className="form-select"
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
+                    aria-label="Filtrer par catégorie"
                   >
                     <option value="all">Toutes les catégories</option>
                     {workoutCategories.map(category => (
@@ -208,14 +215,16 @@ const UserWorkoutsPage = () => {
         )}
 
         {/* Liste des séances */}
-        {currentWorkouts.length === 0 ? (
-          <div className="alert alert-info d-flex align-items-center" role="alert">
-            <FaInfoCircle className="me-2" />
-            Aucune séance ne correspond à vos critères de recherche.
-          </div>
-        ) : (
-          <div className="row g-4">
-            {currentWorkouts.map((workout) => (
+        <div className="row g-4">
+          {paginationData.currentWorkouts.length === 0 ? (
+            <div className="col-12">
+              <div className="alert alert-info d-flex align-items-center" role="alert">
+                <FaInfoCircle className="me-2" aria-hidden="true" />
+                Aucune séance ne correspond à vos critères de recherche.
+              </div>
+            </div>
+          ) : (
+            paginationData.currentWorkouts.map((workout) => (
               <div key={workout.id} className="col-md-6 col-xl-4">
                 <div className="card h-100 shadow-sm hover-lift">
                   <div className="card-header bg-white border-bottom-0">
@@ -230,14 +239,14 @@ const UserWorkoutsPage = () => {
                   </div>
                   <div className="card-body">
                     <div className="d-flex align-items-center mb-3">
-                      <div className="bg-primary text-white rounded-circle p-3 me-3">
+                      <div className="bg-primary text-white rounded-circle p-3 me-3" aria-hidden="true">
                         <FaSwimmingPool />
                       </div>
                       <div>
                         <p>{workout.title}</p>
                         {workout.workout_category && (
                           <span className="badge bg-light text-dark">
-                            <FaTag className="me-1" /> {workout.workout_category}
+                            <FaTag className="me-1" aria-hidden="true" /> {workout.workout_category}
                           </span>
                         )}
                       </div>
@@ -246,7 +255,7 @@ const UserWorkoutsPage = () => {
                     <div className="row g-2 mb-4">
                       <div className="col-12">
                         <div className="h4 card-title mb-1">
-                          <FaRulerHorizontal className="me-2" />
+                          <FaRulerHorizontal className="me-2" aria-hidden="true" />
                           {formatDistance(workout.totalDistance)}
                         </div>
                       </div>
@@ -254,89 +263,94 @@ const UserWorkoutsPage = () => {
 
                     <div className="d-flex justify-content-between align-items-center text-muted small">
                       <div className="d-flex align-items-center">
-                        <FaSwimmer className="me-2" />
+                        <FaSwimmer className="me-2" aria-hidden="true" />
                         {workout.exercisesCount || 0} exercice{workout.exercisesCount !== 1 ? 's' : ''}
                       </div>
                       <div className="d-flex align-items-center">
-                        <FaTint className="me-2" />
+                        <FaTint className="me-2" aria-hidden="true" />
                         {workout.setsCount || 0} série{workout.setsCount !== 1 ? 's' : ''}
                       </div>
                     </div>
                   </div>
                   <div className="card-footer bg-white border-top-0 p-3">
                     <Link to={`/user/workouts/${workout.id}`} className="btn btn-outline-primary w-100">
-                      <FaEye className="me-1" /> Voir les détails
+                      <FaEye className="me-1" aria-hidden="true" /> Voir les détails
                     </Link>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
 
         {/* Pagination */}
         {filteredWorkouts.length > itemsPerPage && (
-          <div className="card mt-4">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center">
-                <span className="me-2">Afficher</span>
-                <select 
-                  className="form-select form-select-sm" 
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
-                    setCurrentPage(0);
-                  }}
-                  style={{width: '70px'}}
-                >
-                  <option value="6">6</option>
-                  <option value="9">9</option>
-                  <option value="12">12</option>
-                  <option value="15">15</option>
-                </select>
-                <span className="ms-2">séances</span>
-              </div>
-              
-              <nav aria-label="Navigation des pages">
+          <nav aria-label="Navigation des pages de séances" className="mt-4">
+            <div className="card">
+              <div className="card-body d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                  <span className="me-2">Afficher</span>
+                  <select 
+                    className="form-select form-select-sm" 
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(0);
+                    }}
+                    style={{width: '70px'}}
+                    aria-label="Nombre d'éléments par page"
+                  >
+                    <option value="6">6</option>
+                    <option value="9">9</option>
+                    <option value="12">12</option>
+                    <option value="15">15</option>
+                  </select>
+                  <span className="ms-2">séances</span>
+                </div>
+                
                 <ul className="pagination pagination-sm mb-0">
                   <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 0}
+                      aria-label="Page précédente"
                     >
                       &laquo;
                     </button>
                   </li>
                   
-                  {[...Array(pageCount)].map((_, index) => (
+                  {[...Array(paginationData.pageCount)].map((_, index) => (
                     <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
                       <button
                         className="page-link"
                         onClick={() => setCurrentPage(index)}
+                        aria-label={`Page ${index + 1}`}
+                        aria-current={currentPage === index ? 'page' : undefined}
                       >
                         {index + 1}
                       </button>
                     </li>
                   ))}
                   
-                  <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                  <li className={`page-item ${currentPage === paginationData.pageCount - 1 ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === pageCount - 1}
+                      disabled={currentPage === paginationData.pageCount - 1}
+                      aria-label="Page suivante"
                     >
                       &raquo;
                     </button>
                   </li>
                 </ul>
-              </nav>
+              </div>
             </div>
-          </div>
+          </nav>
         )}
       </main>
     </>
   );
 };
 
-export default UserWorkoutsPage;
+export default React.memo(UserWorkoutsPage);

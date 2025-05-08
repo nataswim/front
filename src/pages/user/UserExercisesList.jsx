@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaFilter, 
@@ -45,7 +45,7 @@ const UserExercisesList = () => {
    * 
    * 🇫🇷 Récupération des données d'exercices depuis l'API
    */
-  const fetchExercises = async () => {
+  const fetchExercises = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getExercises();
@@ -82,58 +82,63 @@ const UserExercisesList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Charger les exercices au montage du composant
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [fetchExercises]);
 
   /**
    * 🇬🇧 Filter exercises based on search term, category and level
    * 
    * 🇫🇷 Filtrer les exercices selon le terme de recherche, la catégorie et le niveau
    */
-  const filteredExercises = exercises.filter(exercise => {
-    const matchesSearch = exercise.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (exercise.description && exercise.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = categoryFilter === 'all' || exercise.exercise_category === categoryFilter;
-    const matchesLevel = levelFilter === 'all' || exercise.exercise_level === levelFilter;
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
+  const filteredExercises = useMemo(() => {
+    return exercises.filter(exercise => {
+      const matchesSearch = exercise.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (exercise.description && exercise.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = categoryFilter === 'all' || exercise.exercise_category === categoryFilter;
+      const matchesLevel = levelFilter === 'all' || exercise.exercise_level === levelFilter;
+      return matchesSearch && matchesCategory && matchesLevel;
+    });
+  }, [exercises, searchTerm, categoryFilter, levelFilter]);
 
   // Pagination
-  const pageCount = Math.ceil(filteredExercises.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentExercises = filteredExercises.slice(offset, offset + itemsPerPage);
+  const paginationData = useMemo(() => {
+    const pageCount = Math.ceil(filteredExercises.length / itemsPerPage);
+    const offset = currentPage * itemsPerPage;
+    const currentExercises = filteredExercises.slice(offset, offset + itemsPerPage);
+    return { pageCount, currentExercises };
+  }, [filteredExercises, currentPage, itemsPerPage]);
 
   /**
    * 🇬🇧 Handle thumbnail loading errors
    * 
    * 🇫🇷 Gestion des erreurs de chargement des miniatures
    */
-  const handleThumbnailError = (exerciseId) => {
+  const handleThumbnailError = useCallback((exerciseId) => {
     setThumbnailErrors(prev => ({
       ...prev,
       [exerciseId]: true
     }));
-  };
+  }, []);
 
   /**
    * 🇬🇧 Navigate to exercise details
    * 
    * 🇫🇷 Naviguer vers les détails de l'exercice
    */
-  const handleExerciseClick = (exerciseId) => {
+  const handleExerciseClick = useCallback((exerciseId) => {
     navigate(`/user/exercises/${exerciseId}`);
-  };
+  }, [navigate]);
 
   // Affichage pendant le chargement
   if (loading) {
     return (
       <div className="container py-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
+        <div className="text-center" role="status" aria-live="polite">
+          <div className="spinner-border text-primary" aria-hidden="true">
             <span className="visually-hidden">Chargement...</span>
           </div>
         </div>
@@ -162,7 +167,7 @@ const UserExercisesList = () => {
             <div className="col-md-4">
               <div className="input-group">
                 <span className="input-group-text bg-light">
-                  <FaSearch />
+                  <FaSearch aria-hidden="true" />
                 </span>
                 <input
                   type="text"
@@ -170,6 +175,7 @@ const UserExercisesList = () => {
                   placeholder="Rechercher un exercice..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Rechercher un exercice"
                 />
               </div>
             </div>
@@ -177,12 +183,13 @@ const UserExercisesList = () => {
               <div className="d-flex gap-2">
                 <div className="input-group">
                   <span className="input-group-text bg-light">
-                    <FaFilter />
+                    <FaFilter aria-hidden="true" />
                   </span>
                   <select
                     className="form-select"
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
+                    aria-label="Filtrer par catégorie"
                   >
                     <option value="all">Toutes les catégories</option>
                     {exerciseCategories.map(category => (
@@ -192,12 +199,13 @@ const UserExercisesList = () => {
                 </div>
                 <div className="input-group">
                   <span className="input-group-text bg-light">
-                    <FaFilter />
+                    <FaFilter aria-hidden="true" />
                   </span>
                   <select
                     className="form-select"
                     value={levelFilter}
                     onChange={(e) => setLevelFilter(e.target.value)}
+                    aria-label="Filtrer par niveau"
                   >
                     <option value="all">Tous les niveaux</option>
                     {exerciseLevels.map(level => (
@@ -209,8 +217,9 @@ const UserExercisesList = () => {
                   className="btn btn-outline-secondary" 
                   onClick={fetchExercises}
                   title="Rafraîchir"
+                  aria-label="Rafraîchir la liste"
                 >
-                  <FaSync />
+                  <FaSync aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -226,10 +235,10 @@ const UserExercisesList = () => {
       )}
 
       {/* Affichage en cartes */}
-      {currentExercises.length === 0 ? (
+      {paginationData.currentExercises.length === 0 ? (
         <div className="card shadow-sm">
           <div className="card-body p-5 text-center">
-            <FaSwimmer className="text-muted fs-1 mb-3" />
+            <FaSwimmer className="text-muted fs-1 mb-3" aria-hidden="true" />
             <p className="text-muted">
               Aucun exercice ne correspond à vos critères de recherche.
             </p>
@@ -237,18 +246,27 @@ const UserExercisesList = () => {
         </div>
       ) : (
         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 g-4 mb-4">
-          {currentExercises.map((exercise) => (
+          {paginationData.currentExercises.map((exercise) => (
             <div key={exercise.id} className="col">
               <div 
                 className="card h-100 shadow-sm hover-lift" 
                 style={{ cursor: 'pointer' }}
                 onClick={() => handleExerciseClick(exercise.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleExerciseClick(exercise.id);
+                  }
+                }}
+                tabIndex="0"
+                role="button"
+                aria-label={`Voir les détails de l'exercice ${exercise.title}`}
               >
                 <div className="card-img-container" style={{ height: '180px', overflow: 'hidden' }}>
                   {exercise.upload_id && imageData[exercise.id] && imageData[exercise.id].url && !thumbnailErrors[exercise.id] ? (
                     <img
                       src={imageData[exercise.id].url}
-                      alt={exercise.title}
+                      alt=""
                       className="card-img-top"
                       style={{ 
                         height: '100%',
@@ -259,12 +277,12 @@ const UserExercisesList = () => {
                     />
                   ) : (
                     <div className="bg-light d-flex justify-content-center align-items-center h-100">
-                      <FaSwimmingPool className="text-primary" style={{ fontSize: '3rem' }} />
+                      <FaSwimmingPool className="text-primary" style={{ fontSize: '3rem' }} aria-hidden="true" />
                     </div>
                   )}
                 </div>
                 <div className="card-body text-center">
-                  <h5 className="card-title mb-0">{exercise.title}</h5>
+                  <h5 className="card-title">{exercise.title}</h5>
                 </div>
               </div>
             </div>
@@ -274,63 +292,68 @@ const UserExercisesList = () => {
 
       {/* Pagination */}
       {filteredExercises.length > itemsPerPage && (
-        <div className="card mt-4">
-          <div className="card-body d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center">
-              <span className="me-2">Afficher</span>
-              <select 
-                className="form-select form-select-sm" 
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(0);
-                }}
-                style={{width: '70px'}}
-              >
-                <option value="8">8</option>
-                <option value="12">12</option>
-                <option value="16">16</option>
-                <option value="24">24</option>
-              </select>
-              <span className="ms-2">éléments</span>
-            </div>
-            
-            <nav aria-label="Navigation des pages">
+        <nav aria-label="Pagination des exercices">
+          <div className="card mt-4">
+            <div className="card-body d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center">
+                <span className="me-2">Afficher</span>
+                <select 
+                  className="form-select form-select-sm" 
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(0);
+                  }}
+                  style={{width: '70px'}}
+                  aria-label="Nombre d'éléments par page"
+                >
+                  <option value="8">8</option>
+                  <option value="12">12</option>
+                  <option value="16">16</option>
+                  <option value="24">24</option>
+                </select>
+                <span className="ms-2">éléments</span>
+              </div>
+              
               <ul className="pagination pagination-sm mb-0">
                 <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
                   <button 
                     className="page-link" 
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 0}
+                    aria-label="Page précédente"
                   >
                     &laquo;
                   </button>
                 </li>
                 
-                {[...Array(pageCount)].map((_, index) => (
+                {[...Array(paginationData.pageCount)].map((_, index) => (
                   <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
                     <button
                       className="page-link"
                       onClick={() => setCurrentPage(index)}
+                      aria-label={`Page ${index + 1}`}
+                      aria-current={currentPage === index ? 'page' : undefined}
                     >
                       {index + 1}
                     </button>
                   </li>
                 ))}
                 
-                <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                <li className={`page-item ${currentPage === paginationData.pageCount - 1 ? 'disabled' : ''}`}>
                   <button 
                     className="page-link" 
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === pageCount - 1}
+                    disabled={currentPage === paginationData.pageCount - 1}
+                    aria-label="Page suivante"
                   >
                     &raquo;
                   </button>
                 </li>
               </ul>
-            </nav>
+            </div>
           </div>
-        </div>
+        </nav>
       )}
 
       {/* CSS pour l'effet de survol */}
@@ -346,9 +369,14 @@ const UserExercisesList = () => {
         .hover-lift:hover img {
           transform: scale(1.05);
         }
+        .hover-lift:focus {
+          outline: 3px solid #048080;
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+        }
       `}</style>
     </div>
   );
 };
 
-export default UserExercisesList;
+export default React.memo(UserExercisesList);

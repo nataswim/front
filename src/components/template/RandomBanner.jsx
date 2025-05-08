@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../../assets/styles/user-layout.css'; 
 
 const RandomBanner = () => {
   const [currentBanner, setCurrentBanner] = useState('');
   const [key, setKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const bannerDir = '/assets/images/banner/';
   const bannerCount = 5;
   const bannerExtension = '.jpg';
   const bannerPrefix = 'nataswim_app_banner_';
 
-  const selectRandomBanner = () => {
+  const selectRandomBanner = useCallback(() => {
     const randomNumber = Math.floor(Math.random() * bannerCount) + 1;
     const bannerPath = `${bannerDir}${bannerPrefix}${randomNumber}${bannerExtension}`;
     setCurrentBanner(bannerPath);
     setKey(prevKey => prevKey + 1);
-  };
+    setIsLoading(true);
+  }, [bannerDir, bannerPrefix, bannerExtension, bannerCount]);
 
   useEffect(() => {
     const handleUrlChange = () => {
@@ -54,24 +57,42 @@ const RandomBanner = () => {
       observer.disconnect();
       document.removeEventListener('click', handleLinkClick);
     };
-  }, []);
+  }, [selectRandomBanner]);
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleImageError = (e) => {
+    console.warn('Erreur de chargement de la bannière:', e);
+    setError('Impossible de charger la bannière');
+    setIsLoading(false);
+    e.target.src = `${bannerDir}${bannerPrefix}1${bannerExtension}`;
+  };
 
   return (
-    <div className="banner-container-outer">
-        <div className="banner-wrapper">
-          <img
-            key={key}
-            src={currentBanner}
-            alt="Bannière du site"
-            className="banner-image"
-            onError={(e) => {
-              console.warn('Erreur de chargement de la bannière:', e);
-              e.target.src = `${bannerDir}${bannerPrefix}1${bannerExtension}`;
-            }}
-          />
-        </div>
+    <div className="banner-container-outer" role="banner" aria-label="Bannière décorative">
+      <div className="banner-wrapper">
+        {isLoading && (
+          <div className="banner-loading" aria-hidden="true">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Chargement de la bannière...</span>
+            </div>
+          </div>
+        )}
+        <img
+          key={key}
+          src={currentBanner}
+          alt=""
+          className="banner-image"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          style={{ opacity: isLoading ? 0 : 1 }}
+        />
+        {error && <div className="banner-error" aria-live="polite">{error}</div>}
+      </div>
     </div>
   );
 };
 
-export default RandomBanner;
+export default React.memo(RandomBanner);

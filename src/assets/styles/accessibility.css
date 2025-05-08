@@ -1,0 +1,203 @@
+/* Styles d'accessibilité */
+
+/* Skip link - lien d'évitement pour les utilisateurs de clavier */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #048080;
+  color: white;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus styles for keyboard navigation */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #048080;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-success,
+  .btn-danger,
+  .btn-warning,
+  .btn-info {
+    forced-color-adjust: none;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  a:focus,
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 3px solid ButtonText;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .carousel-item {
+    transition: none !important;
+  }
+}
+
+/* Styles for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Improved contrast for text */
+.text-muted {
+  color: #6c757d !important; /* Ensure sufficient contrast */
+}
+
+/* Improved focus indicators for interactive elements */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.btn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(4, 128, 128, 0.5);
+  border-color: #048080;
+}
+
+/* Ensure sufficient contrast for form placeholders */
+::placeholder {
+  color: #6c757d !important;
+  opacity: 0.7 !important;
+}
+
+/* Ensure sufficient contrast for disabled elements */
+.btn:disabled,
+.form-control:disabled,
+.form-select:disabled {
+  opacity: 0.65;
+}
+
+/* Improved focus for custom components */
+.card:focus-within,
+.modal:focus-within,
+.dropdown-menu:focus-within {
+  outline: 2px solid #048080;
+}
+
+/* Ensure links are distinguishable */
+a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.nav-link,
+.navbar-brand,
+.btn {
+  text-decoration: none;
+}
+
+/* Ensure form labels are visible */
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* Ensure error messages are clearly visible */
+.invalid-feedback,
+.text-danger {
+  font-weight: 500;
+}
+
+/* Ensure buttons have sufficient padding for touch targets */
+.btn {
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Ensure table headers are distinguishable */
+th {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Ensure modal dialogs are properly focused */
+.modal {
+  outline: none;
+}
+
+/* Ensure tooltips have sufficient contrast */
+.tooltip {
+  --bs-tooltip-bg: #000;
+  --bs-tooltip-color: #fff;
+}
+
+/* Ensure alerts are properly styled for accessibility */
+.alert {
+  border: 1px solid transparent;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.alert-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+}
+
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.alert-info {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+}

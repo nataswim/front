@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { FaArrowLeft, FaSave } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 const FormContainer = ({
   title,
@@ -17,8 +18,9 @@ const FormContainer = ({
         variant="outline-primary" 
         className="mb-4" 
         onClick={onBack}
+        aria-label="Retour à la liste"
       >
-        <FaArrowLeft className="me-2" /> Retour à la liste
+        <FaArrowLeft className="me-2" aria-hidden="true" /> Retour à la liste
       </Button>
 
       <Card className="shadow">
@@ -28,13 +30,13 @@ const FormContainer = ({
 
         <Card.Body>
           {isLoading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
+            <div className="text-center py-5" role="status" aria-live="polite">
+              <div className="spinner-border text-primary" aria-hidden="true">
                 <span className="visually-hidden">Chargement...</span>
               </div>
             </div>
           ) : (
-            <form onSubmit={onSubmit}>
+            <form onSubmit={onSubmit} noValidate>
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -48,15 +50,16 @@ const FormContainer = ({
                   type="submit"
                   variant="primary"
                   disabled={isSaving}
+                  aria-busy={isSaving}
                 >
                   {isSaving ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Enregistrement...
+                      <span>Enregistrement...</span>
                     </>
                   ) : (
                     <>
-                      <FaSave className="me-2" /> Enregistrer
+                      <FaSave className="me-2" aria-hidden="true" /> Enregistrer
                     </>
                   )}
                 </Button>
@@ -67,6 +70,16 @@ const FormContainer = ({
       </Card>
     </div>
   );
+};
+
+FormContainer.propTypes = {
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onBack: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool,
+  isSaving: PropTypes.bool,
+  error: PropTypes.string
 };
 
 export default FormContainer;

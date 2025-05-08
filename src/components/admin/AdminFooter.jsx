@@ -20,7 +20,7 @@ const AdminFooter = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="admin-footer text-white pt-5 pb-4">
+    <footer className="admin-footer text-white pt-5 pb-4" role="contentinfo">
       <div className="container">
         <div className="row">
           {/* Colonne Logo & Description */}
@@ -88,16 +88,16 @@ const AdminFooter = () => {
           <div className="col-md-4 mb-4">
             <h6 className="text-uppercase fw-bold mb-4">Contact</h6>
             <p className="mb-2">
-              <FaMapMarkerAlt className="me-2" />
+              <FaMapMarkerAlt className="me-2" aria-hidden="true" />
               45 Avenue Albert Camus, 75000 Paris, France
             </p>
             <p className="mb-2">
-              <FaEnvelope className="me-2" />
-              contact@nataswim.net
+              <FaEnvelope className="me-2" aria-hidden="true" />
+              <a href="mailto:contact@nataswim.net" className="text-white">contact@nataswim.net</a>
             </p>
             <p className="mb-2">
-              <FaPhone className="me-2" />
-              +33 6 44 24 87 11
+              <FaPhone className="me-2" aria-hidden="true" />
+              <a href="tel:+33644248711" className="text-white">+33 6 44 24 87 11</a>
             </p>
           </div>
         </div>
@@ -114,10 +114,10 @@ const AdminFooter = () => {
               <ul className="list-inline mb-0">
                 
                 <li className="list-inline-item ms-3">
-                <Link    to="https://www.nataswim.com/"    className="text-white small"    target="_blank"    rel="noopener noreferrer" >🥇 Sport NeT Systèmes SNS </Link>
+                <Link to="https://www.nataswim.com/" className="text-white small" target="_blank" rel="noopener noreferrer">🥇 Sport NeT Systèmes SNS </Link>
                 </li>
                 <li className="list-inline-item ms-3">
-                <Link    to="https://nataswimshop.com/"    className="text-white small"    target="_blank"    rel="noopener noreferrer" >💙 Sport Boutique </Link>
+                <Link to="https://nataswimshop.com/" className="text-white small" target="_blank" rel="noopener noreferrer">💙 Sport Boutique </Link>
                 </li>
               </ul>
             </div>

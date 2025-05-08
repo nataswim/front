@@ -12,13 +12,15 @@ import Notification from './components/ui/Notification';
 import './assets/styles/global.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-import TextEditor from "./components/ui/forms/TextEditor";
-
 function App() {
   return (
     <ErrorBoundary>
       <UIProvider>
         <AuthProvider>
+          {/* Skip link for keyboard users */}
+          <a href="#main-content" className="skip-link">
+            Aller au contenu principal
+          </a>
           <Router />
           <Notification />
         </AuthProvider>

@@ -9,9 +9,10 @@ const UserLayout = () => {
     <div className="user-layout">
       <UserHeader />
       <div className="user-content">
-      <RandomBanner />
-
-        <Outlet />
+        <RandomBanner />
+        <main id="main-content" className="user-main">
+          <Outlet />
+        </main>
       </div>
       <UserFooter />
     </div>

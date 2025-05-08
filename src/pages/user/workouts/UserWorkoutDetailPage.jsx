@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   FaArrowLeft,
@@ -96,7 +96,7 @@ const UserWorkoutDetailPage = () => {
   }, [id]);
 
   // Calculer les statistiques de la séance
-  const calculateWorkoutStats = () => {
+  const calculateWorkoutStats = useCallback(() => {
     const sets = enrichedSwimSets.length > 0 ? enrichedSwimSets : swimSets;
     
     const totalDistance = sets.reduce((acc, set) => {
@@ -115,27 +115,27 @@ const UserWorkoutDetailPage = () => {
       totalTime: Math.round(totalTime),
       totalSets: sets.length
     };
-  };
+  }, [enrichedSwimSets, swimSets]);
 
   // Formater la durée
-  const formatDuration = (minutes) => {
+  const formatDuration = useCallback((minutes) => {
     if (!minutes) return '0 min';
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}min` : ''}`;
-  };
+  }, []);
 
   // Format rest time in seconds to MM:SS
-  const formatRestTime = (seconds) => {
+  const formatRestTime = useCallback((seconds) => {
     if (!seconds) return '00:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
   // Obtenir la couleur du badge selon la catégorie
-  const getCategoryBadgeColor = (category) => {
+  const getCategoryBadgeColor = useCallback((category) => {
     switch (category) {
       case 'Aero 1': return 'success';
       case 'Vitesse': return 'danger';
@@ -144,14 +144,14 @@ const UserWorkoutDetailPage = () => {
       case 'Mixte': return 'purple';
       default: return 'secondary';
     }
-  };
+  }, []);
 
   /**
    * 🇬🇧 Render HTML content safely
    * 
    * 🇫🇷 Rendre le contenu HTML en toute sécurité
    */
-  const renderDescription = (description) => {
+  const renderDescription = useCallback((description) => {
     if (!description) return <p className="text-muted mb-0">Aucune description disponible.</p>;
     
     return (
@@ -160,14 +160,20 @@ const UserWorkoutDetailPage = () => {
         dangerouslySetInnerHTML={{ __html: description }}
       />
     );
-  };
+  }, []);
+
+  // Mémoiser les statistiques pour éviter des recalculs inutiles
+  const stats = useMemo(() => calculateWorkoutStats(), [calculateWorkoutStats]);
+  
+  // Mémoiser les séries pour éviter des recalculs inutiles
+  const sets = useMemo(() => enrichedSwimSets.length > 0 ? enrichedSwimSets : swimSets, [enrichedSwimSets, swimSets]);
 
   if (loading) {
     return (
       <>
         <main className="container py-4">
-          <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
+          <div className="text-center" role="status" aria-live="polite">
+            <div className="spinner-border text-primary" aria-hidden="true">
               <span className="visually-hidden">Chargement...</span>
             </div>
           </div>
@@ -181,22 +187,19 @@ const UserWorkoutDetailPage = () => {
       <>
         <main className="container py-4">
           <div className="alert alert-danger" role="alert">
-            <FaInfoCircle className="me-2" />
+            <FaInfoCircle className="me-2" aria-hidden="true" />
             {error || "Séance non trouvée"}
           </div>
           <button 
             className="btn btn-primary"
             onClick={() => navigate('/user/workouts')}
           >
-            <FaArrowLeft className="me-2" /> Retour aux séances
+            <FaArrowLeft className="me-2" aria-hidden="true" /> Retour aux séances
           </button>
         </main>
       </>
     );
   }
-
-  const stats = calculateWorkoutStats();
-  const sets = enrichedSwimSets.length > 0 ? enrichedSwimSets : swimSets;
 
   return (
     <>
@@ -206,8 +209,9 @@ const UserWorkoutDetailPage = () => {
         <button
           className="btn btn-outline-primary me-3"
           onClick={() => navigate('/user/workouts')}
+          aria-label="Retour à la liste des séances"
         >
-          <FaArrowLeft className="me-2" /> Plus de séances
+          <FaArrowLeft className="me-2" aria-hidden="true" /> Plus de séances
         </button>
         <div>
         </div>
@@ -229,7 +233,7 @@ const UserWorkoutDetailPage = () => {
           <div className="col-md-4">
             <div className="card bg-light h-100">
               <div className="card-body text-center">
-                <FaRulerHorizontal className="text-primary mb-2" size={30} />
+                <FaRulerHorizontal className="text-primary mb-2" size={30} aria-hidden="true" />
                 <h3 className="h5 mb-2">Distance</h3>
                 <p className="h3 mb-0 text-primary fw-bold">{stats.totalDistance}m</p>
               </div>
@@ -238,7 +242,7 @@ const UserWorkoutDetailPage = () => {
           <div className="col-md-4">
             <div className="card bg-light h-100">
               <div className="card-body text-center">
-                <FaClock className="text-primary mb-2" size={30} />
+                <FaClock className="text-primary mb-2" size={30} aria-hidden="true" />
                 <h3 className="h5 mb-2">Durée estimée</h3>
                 <p className="h3 mb-0 text-primary fw-bold">{formatDuration(stats.totalTime)}</p>
               </div>
@@ -247,7 +251,7 @@ const UserWorkoutDetailPage = () => {
           <div className="col-md-4">
             <div className="card bg-light h-100">
               <div className="card-body text-center">
-                <FaLayerGroup className="text-primary mb-2" size={30} />
+                <FaLayerGroup className="text-primary mb-2" size={30} aria-hidden="true" />
                 <h3 className="h5 mb-2">Séries</h3>
                 <p className="h3 mb-0 text-primary fw-bold">{stats.totalSets}</p>
               </div>
@@ -259,14 +263,14 @@ const UserWorkoutDetailPage = () => {
         <div className="card shadow-sm mb-4">
           <div className="card-header bg-white">
             <h2 className="h5 mb-0">
-              <FaSwimmingPool className="me-2 text-primary" />
+              <FaSwimmingPool className="me-2 text-primary" aria-hidden="true" />
               La Séance ({sets.length})
             </h2>
           </div>
           <div className="card-body p-0">
             {sets.length === 0 ? (
               <div className="alert alert-info m-3">
-                <FaInfoCircle className="me-2" />
+                <FaInfoCircle className="me-2" aria-hidden="true" />
                 Aucune série n'a encore été ajoutée à cette séance.
               </div>
             ) : (
@@ -274,11 +278,11 @@ const UserWorkoutDetailPage = () => {
                 <table className="table table-hover mb-0">
                   <thead className="table-light">
                     <tr>
-                      <th className="text-center">Répétitions</th>
-                      <th className="text-center">Distance</th>
-                      <th>Exercice</th>
-                      <th className="text-center">Repos</th>
-                      <th className="text-center">Total</th>
+                      <th className="text-center" scope="col">Répétitions</th>
+                      <th className="text-center" scope="col">Distance</th>
+                      <th scope="col">Exercice</th>
+                      <th className="text-center" scope="col">Repos</th>
+                      <th className="text-center" scope="col">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -296,7 +300,11 @@ const UserWorkoutDetailPage = () => {
                         </td>
                         <td>
                           {set.exercise_id ? (
-                            <Link to={`/user/exercises/${set.exercise_id}`} className="text-decoration-none">
+                            <Link 
+                              to={`/user/exercises/${set.exercise_id}`} 
+                              className="text-decoration-none"
+                              aria-label={`Voir les détails de l'exercice ${set.exerciseTitle}`}
+                            >
                               {set.exerciseTitle}
                             </Link>
                           ) : (
@@ -332,7 +340,7 @@ const UserWorkoutDetailPage = () => {
         <div className="card shadow-sm mb-4">
           <div className="card-header bg-white">
             <h2 className="h5 mb-0">
-              <FaInfoCircle className="me-2 text-primary" />
+              <FaInfoCircle className="me-2 text-primary" aria-hidden="true" />
               Description
             </h2>
           </div>
@@ -345,4 +353,4 @@ const UserWorkoutDetailPage = () => {
   );
 };
 
-export default UserWorkoutDetailPage;
+export default React.memo(UserWorkoutDetailPage);

@@ -1,4 +1,3 @@
-
 import { correctApiCalls } from './utils/api-fix';
 
 import React from 'react';
@@ -11,7 +10,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './assets/styles/global.css';
-import './assets/styles/custom-bootstrap.css'; // Styles personnalisés  Bootstrap
+import './assets/styles/custom-bootstrap.css'; // Styles personnalisés Bootstrap
+import './assets/styles/accessibility.css'; // Styles d'accessibilité
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 correctApiCalls();

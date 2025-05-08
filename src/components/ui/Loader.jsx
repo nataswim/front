@@ -15,13 +15,15 @@ import PropTypes from 'prop-types';
  * @param {string} [props.color='blue'] - Loader color (blue, green, red, gray)
  * @param {string} [props.className] - Additional CSS classes
  * @param {string} [props.label] - Optional loading text
+ * @param {string} [props.ariaLabel] - Accessible label for screen readers
  */
 const Loader = ({
   type = 'default',
   size = 'md',
   color = 'blue',
   className = '',
-  label
+  label,
+  ariaLabel
 }) => {
   // Validate and set loader type
   const loaderTypes = {
@@ -49,6 +51,9 @@ const Loader = ({
   };
   const validColor = Object.keys(loaderColors).includes(color) ? color : 'blue';
 
+  // Accessible label
+  const accessibleLabel = ariaLabel || label || 'Chargement en cours';
+
   // Render specific loader type
   const renderLoader = () => {
     switch (type) {
@@ -64,6 +69,7 @@ const Loader = ({
             xmlns="http://www.w3.org/2000/svg" 
             fill="none" 
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <circle 
               className="opacity-25" 
@@ -89,6 +95,7 @@ const Loader = ({
               ${loaderColors[validColor]} 
               ${className}
             `}
+            aria-hidden="true"
           >
             <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
             <div className="w-2 h-2 bg-current rounded-full animate-bounce delay-100"></div>
@@ -105,6 +112,7 @@ const Loader = ({
               ${loaderTypes[validType]}
               ${className}
             `}
+            aria-hidden="true"
           >
             <div className="h-full bg-current animate-progress"></div>
           </div>
@@ -120,19 +128,26 @@ const Loader = ({
               bg-current rounded-full
               ${className}
             `}
+            aria-hidden="true"
           ></div>
         );
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div 
+      className="flex flex-col items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
       {renderLoader()}
       {label && (
         <p className={`mt-2 text-sm ${loaderColors[validColor]}`}>
           {label}
         </p>
       )}
+      <span className="sr-only">{accessibleLabel}</span>
     </div>
   );
 };
@@ -143,7 +158,8 @@ Loader.propTypes = {
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   color: PropTypes.oneOf(['blue', 'green', 'red', 'gray']),
   className: PropTypes.string,
-  label: PropTypes.string
+  label: PropTypes.string,
+  ariaLabel: PropTypes.string
 };
 
 export default Loader;

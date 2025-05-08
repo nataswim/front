@@ -38,7 +38,7 @@ const QuickAccessCard = ({ icon: Icon, title, description, link, color = "primar
   <div className="col-md-4 mb-4">
     <div className="card h-100 hover-lift">
       <div className="card-body text-center">
-        <div className={`bg-${color}-subtle p-3 rounded-circle d-inline-block mb-3`}>
+        <div className={`bg-${color}-subtle p-3 rounded-circle d-inline-block mb-3`} aria-hidden="true">
           <Icon className={`text-${color} fs-2`} />
         </div>
         <h3 className="card-title h5">{title}</h3>
@@ -61,7 +61,7 @@ const LibraryCard = ({ icon: Icon, title, items, color = "primary" }) => (
     <div className="card h-100 shadow-sm">
       <div className="card-header bg-light p-3">
         <div className="d-flex align-items-center">
-          <Icon className={`text-${color} me-2 fs-4`} />
+          <Icon className={`text-${color} me-2 fs-4`} aria-hidden="true" />
           <h3 className="card-title h5 mb-0">{title}</h3>
         </div>
       </div>
@@ -69,7 +69,7 @@ const LibraryCard = ({ icon: Icon, title, items, color = "primary" }) => (
         <ul className="list-unstyled mb-0">
           {items.map((item, index) => (
             <li key={index} className="mb-2 d-flex align-items-start">
-              <span className="me-2">•</span>
+              <span className="me-2" aria-hidden="true">•</span>
               <span>{item}</span>
             </li>
           ))}
@@ -246,7 +246,8 @@ const UserDashboardPage = () => {
         </header>
 
         {/* 🇬🇧 Quick Access Section | 🇫🇷 Section d'accès rapide */}
-        <section className="mb-5">
+        <section className="mb-5" aria-labelledby="quick-access-heading">
+          <h2 id="quick-access-heading" className="visually-hidden">Accès rapide</h2>
           <div className="row">
             {quickAccessCards.map((card, index) => (
               <QuickAccessCard 
@@ -264,9 +265,9 @@ const UserDashboardPage = () => {
         
 
         {/* 🇬🇧 Library Resources Section | 🇫🇷 Section des ressources de bibliothèque */}
-        <section className="mb-4">
+        <section className="mb-4" aria-labelledby="library-heading">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="h3 mb-0">Bibliothèque d'Entraînement</h2>
+            <h2 id="library-heading" className="h3 mb-0">Bibliothèque d'Entraînement</h2>
             
           </div>
           
