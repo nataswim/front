@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   FaFilter, 
   FaSearch, 
+  FaCalendarAlt, 
   FaInfoCircle,
   FaEye,
   FaTag,
@@ -11,8 +12,7 @@ import {
   FaSwimmingPool,
   FaSort,
   FaSortAmountDown,
-  FaSortAmountUp,
-  FaCalendarAlt
+  FaSortAmountUp
 } from 'react-icons/fa';
 import { getPlans } from '../../services/plans';
 import { getWorkoutsForPlan } from '../../services/planWorkouts';

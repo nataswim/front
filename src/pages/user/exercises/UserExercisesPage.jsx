@@ -369,4 +369,4 @@ const UserExercisesPage = () => {
   );
 };
 
-export default UserExercisesPage;
+export default React.memo(UserExercisesPage);

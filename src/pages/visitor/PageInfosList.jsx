@@ -473,4 +473,4 @@ const getCategoryBadgeColor = (category) => {
   }
 };
 
-export default PageInfosList;
+export default React.memo(PageInfosList);
