@@ -1,7 +1,4 @@
-// src/pages/visitor/PageInfosList.jsx
-// Page des articles et actualités du site
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaCalendarAlt, 
@@ -27,10 +24,10 @@ import Footer from '../../components/template/Footer';
 import '../../assets/styles/themes.css';
 import axios from 'axios';
 
-// Composant pour les cartes d'articles
-const ArticleCard = ({ title, content, category, date, id, image, onImageError }) => {
+// Composant pour les cartes d'articles - mémoïsé pour éviter les re-rendus inutiles
+const ArticleCard = React.memo(({ title, content, category, date, id, image, onImageError }) => {
   // Formatter le contenu pour l'aperçu
-  const formatContentPreview = (content, maxLength = 150) => {
+  const formatContentPreview = useCallback((content, maxLength = 150) => {
     if (!content) return "Aucun contenu disponible";
     
     const tempDiv = document.createElement("div");
@@ -40,10 +37,10 @@ const ArticleCard = ({ title, content, category, date, id, image, onImageError }
     return textContent.length > maxLength 
       ? textContent.substring(0, maxLength) + '...'
       : textContent;
-  };
+  }, []);
 
   // Obtenir la couleur du badge selon la catégorie
-  const getCategoryBadgeColor = (category) => {
+  const getCategoryBadgeColor = useCallback((category) => {
     switch (category) {
       case 'Information': return 'info';
       case 'Conseils': return 'success';
@@ -51,7 +48,7 @@ const ArticleCard = ({ title, content, category, date, id, image, onImageError }
       case 'Foire aux questions': return 'primary';
       default: return 'secondary';
     }
-  };
+  }, []);
   
   return (
     <div className="card h-100 shadow-sm hover-lift border-0">
@@ -113,7 +110,7 @@ const ArticleCard = ({ title, content, category, date, id, image, onImageError }
       </div>
     </div>
   );
-};
+});
 
 // Composant principal
 const PageInfosList = () => {
@@ -211,27 +208,29 @@ const PageInfosList = () => {
   }, [retryCount]);
 
   // Gérer les erreurs de chargement des miniatures
-  const handleThumbnailError = (pageId) => {
+  const handleThumbnailError = useCallback((pageId) => {
     console.log(`Erreur de chargement de l'image pour la page ${pageId}`);
     setThumbnailErrors(prev => ({
       ...prev,
       [pageId]: true
     }));
-  };
+  }, []);
 
-  // Filtrer les pages par catégorie et terme de recherche
-  const filteredPages = pages.filter(page => {
-    const matchesSearch = searchTerm === '' || 
-                         page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (page.content && page.content.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = categoryFilter === 'all' || page.page_category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  // Filtrer les pages par catégorie et terme de recherche - mémoïsé pour éviter les recalculs inutiles
+  const filteredPages = useMemo(() => {
+    return pages.filter(page => {
+      const matchesSearch = searchTerm === '' || 
+                           page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (page.content && page.content.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = categoryFilter === 'all' || page.page_category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [pages, searchTerm, categoryFilter]);
 
   // Fonction pour recharger les données
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setRetryCount(prev => prev + 1);
-  };
+  }, []);
 
   if (loading) {
     return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaPlus, 
@@ -10,7 +10,6 @@ import {
   FaSync,
   FaSwimmingPool,
   FaSwimmer,
-  FaTint,
   FaSort,
   FaSortAmountDown,
   FaSortAmountUp,
@@ -56,7 +55,7 @@ const UserWorkoutsList = () => {
    * 
    * 🇫🇷 Récupération des séances et leurs détails depuis l'API
    */
-  const fetchWorkouts = async () => {
+  const fetchWorkouts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getWorkouts();
@@ -67,27 +66,18 @@ const UserWorkoutsList = () => {
         response.data.map(async (workout) => {
           try {
             // Récupérer les exercices
-            const exercisesResponse = await axios.get(`/api/workouts/${workout.id}/exercises`);
+            const exercisesResponse = await axios.get(`http://127.0.0.1:8000/api/workouts/${workout.id}/exercises`);
             const exercisesCount = exercisesResponse.data.length;
             
             // Récupérer les séries
-            const setsResponse = await axios.get(`/api/workouts/${workout.id}/swim-sets`);
+            const setsResponse = await axios.get(`http://127.0.0.1:8000/api/workouts/${workout.id}/swim-sets`);
             const sets = setsResponse.data;
             const setsCount = sets.length;
             
             // Calculer la distance totale
-            let totalDistance = 0;
-            if (sets && sets.length > 0) {
-              totalDistance = sets.reduce((acc, set) => {
-                const distance = set.set_distance || 0;
-                const repetitions = set.set_repetition || 1;
-                return acc + (distance * repetitions);
-              }, 0);
-            } else {
-              // Assignez une distance fictive pour les séances sans séries
-              // À supprimer en production - uniquement pour la démonstration
-              totalDistance = Math.floor(Math.random() * 4000) + 1000;
-            }
+            const totalDistance = sets.reduce((acc, set) => {
+              return acc + ((set.set_distance || 0) * (set.set_repetition || 1));
+            }, 0);
             
             return {
               ...workout,
@@ -97,13 +87,11 @@ const UserWorkoutsList = () => {
             };
           } catch (err) {
             console.error(`Erreur lors de la récupération des détails pour la séance ${workout.id}:`, err);
-            // Assignez une distance fictive en cas d'erreur
-            // À supprimer en production - uniquement pour la démonstration
             return {
               ...workout,
-              exercisesCount: Math.floor(Math.random() * 10) + 1,
-              setsCount: Math.floor(Math.random() * 8) + 2,
-              totalDistance: Math.floor(Math.random() * 4000) + 1000
+              exercisesCount: 0,
+              setsCount: 0,
+              totalDistance: 0
             };
           }
         })
@@ -117,51 +105,54 @@ const UserWorkoutsList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchWorkouts();
-  }, []);
+  }, [fetchWorkouts]);
 
   /**
    * 🇬🇧 Request sorting by column
    * 
    * 🇫🇷 Demander le tri par colonne
    */
-  const requestSort = (key) => {
+  const requestSort = useCallback((key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
     setSortConfig({ key, direction });
-  };
+  }, [sortConfig]);
 
   /**
    * 🇬🇧 Get sort indicator icon
    * 
    * 🇫🇷 Obtenir l'icône d'indicateur de tri
    */
-  const getSortIcon = (key) => {
+  const getSortIcon = useCallback((key) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'ascending' ? 
         <FaSortAmountUp className="ms-1" /> : 
         <FaSortAmountDown className="ms-1" />;
     }
-    return <FaSort className="ms-1 text-muted" />;
-  };
+    return <FaSort className="ms-1 text-muted opacity-50" />;
+  }, [sortConfig]);
 
   /**
    * 🇬🇧 Apply sorting and filtering to workouts
    * 
    * 🇫🇷 Appliquer le tri et le filtrage aux séances
    */
-  const getSortedWorkouts = () => {
+  const sortedFilteredWorkouts = useMemo(() => {
+    // Filtrer les séances
     let filteredItems = workoutsWithStats.filter(workout => {
-      const matchesSearch = workout.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = workout.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (workout.description && workout.description.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCategory = categoryFilter === 'all' || workout.workout_category === categoryFilter;
       return matchesSearch && matchesCategory;
     });
 
+    // Trier les séances
     if (sortConfig.key) {
       filteredItems.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -175,25 +166,27 @@ const UserWorkoutsList = () => {
     }
     
     return filteredItems;
-  };
+  }, [workoutsWithStats, searchTerm, categoryFilter, sortConfig]);
 
-  // Obtenir les éléments paginés
-  const sortedFilteredWorkouts = getSortedWorkouts();
-  const pageCount = Math.ceil(sortedFilteredWorkouts.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentWorkouts = sortedFilteredWorkouts.slice(offset, offset + itemsPerPage);
+  // Pagination
+  const paginationData = useMemo(() => {
+    const pageCount = Math.ceil(sortedFilteredWorkouts.length / itemsPerPage);
+    const offset = currentPage * itemsPerPage;
+    const currentWorkouts = sortedFilteredWorkouts.slice(offset, offset + itemsPerPage);
+    return { pageCount, currentWorkouts };
+  }, [sortedFilteredWorkouts, currentPage, itemsPerPage]);
 
   /**
    * 🇬🇧 Format distance with appropriate units
    * 
    * 🇫🇷 Formater la distance avec les unités appropriées
    */
-  const formatDistance = (meters) => {
+  const formatDistance = useCallback((meters) => {
     if (meters >= 1000) {
       return `${(meters/1000).toFixed(1)} km`;
     }
     return `${meters} m`;
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -210,8 +203,9 @@ const UserWorkoutsList = () => {
   return (
     <div className="container-fluid py-4">
       {/* En-tête */}
-      <h1 className="title-swim">Séances d'Entrainement</h1>
-
+      <div>
+        <h1 className="display-6 fw-bold mb-4 title-swim">Séances</h1>
+      </div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <p className="text-muted mb-0">
@@ -306,14 +300,14 @@ const UserWorkoutsList = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentWorkouts.length === 0 ? (
+                {paginationData.currentWorkouts.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="text-center py-4">
                       Aucune séance ne correspond à vos critères de recherche.
                     </td>
                   </tr>
                 ) : (
-                  currentWorkouts.map((workout) => (
+                  paginationData.currentWorkouts.map((workout) => (
                     <tr key={workout.id}>
                       <td>
                         <span className="fw-medium">{workout.title}</span>
@@ -334,16 +328,14 @@ const UserWorkoutsList = () => {
                           <FaSwimmer className="me-1" /> {formatDistance(workout.totalDistance)}
                         </span>
                       </td>
-                      <td>
-                        <div className="d-flex justify-content-center">
-                          <button 
-                            className="btn btn-sm btn-primary"
-                            onClick={() => navigate(`/user/workouts/${workout.id}`)}
-                            title="Voir cette séance"
-                          >
-                            <FaEye className="me-2" /> Voir
-                          </button>
-                        </div>
+                      <td className="text-center">
+                        <button 
+                          className="btn btn-sm btn-primary"
+                          onClick={() => navigate(`/user/workouts/${workout.id}`)}
+                          title="Voir cette séance"
+                        >
+                          <FaEye className="me-2" /> Voir
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -356,7 +348,7 @@ const UserWorkoutsList = () => {
 
       {/* Pagination */}
       {sortedFilteredWorkouts.length > itemsPerPage && (
-        <div className="card">
+        <div className="card mt-4">
           <div className="card-body d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
               <span className="me-2">Afficher</span>
@@ -389,7 +381,7 @@ const UserWorkoutsList = () => {
                   </button>
                 </li>
                 
-                {[...Array(pageCount)].map((_, index) => (
+                {[...Array(paginationData.pageCount)].map((_, index) => (
                   <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
                     <button
                       className="page-link"
@@ -400,11 +392,11 @@ const UserWorkoutsList = () => {
                   </li>
                 ))}
                 
-                <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                <li className={`page-item ${currentPage === paginationData.pageCount - 1 ? 'disabled' : ''}`}>
                   <button 
                     className="page-link" 
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === pageCount - 1}
+                    disabled={currentPage === paginationData.pageCount - 1}
                   >
                     &raquo;
                   </button>
@@ -418,4 +410,4 @@ const UserWorkoutsList = () => {
   );
 };
 
-export default UserWorkoutsList;
+export default React.memo(UserWorkoutsList);

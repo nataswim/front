@@ -1,7 +1,4 @@
-// src/pages/user/plans/UserPlansPage.jsx  
-// Pages accessibles après connexion
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaFilter, 
@@ -44,71 +41,71 @@ const UserPlansList = () => {
   const planCategories = ['Débutant', 'Intermédiaire', 'Avancé'];
 
   // Charger les plans et leurs séances depuis l'API
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        setLoading(true);
-        const response = await getPlans();
-        const plansData = response.data;
-        setPlans(plansData);
+  const fetchPlans = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getPlans();
+      const plansData = response.data;
+      setPlans(plansData);
 
-        // Charger les séances pour chaque plan
-        const workoutsData = {};
-        for (const plan of plansData) {
-          try {
-            const workoutsResponse = await getWorkoutsForPlan(plan.id);
-            workoutsData[plan.id] = workoutsResponse.data;
-          } catch (err) {
-            console.error(`Erreur lors du chargement des séances pour le plan ${plan.id}:`, err);
-            workoutsData[plan.id] = [];
-          }
+      // Charger les séances pour chaque plan
+      const workoutsData = {};
+      for (const plan of plansData) {
+        try {
+          const workoutsResponse = await getWorkoutsForPlan(plan.id);
+          workoutsData[plan.id] = workoutsResponse.data;
+        } catch (err) {
+          console.error(`Erreur lors du chargement des séances pour le plan ${plan.id}:`, err);
+          workoutsData[plan.id] = [];
         }
-        setPlanWorkouts(workoutsData);
-        setError(null);
-      } catch (err) {
-        console.error('Erreur lors du chargement des plans:', err);
-        setError('Impossible de charger les plans. Veuillez réessayer.');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchPlans();
+      setPlanWorkouts(workoutsData);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur lors du chargement des plans:', err);
+      setError('Impossible de charger les plans. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
 
   /**
    * 🇬🇧 Request sorting by column
    * 
    * 🇫🇷 Demander le tri par colonne
    */
-  const requestSort = (key) => {
+  const requestSort = useCallback((key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
     setSortConfig({ key, direction });
-  };
+  }, [sortConfig]);
 
   /**
    * 🇬🇧 Get sort indicator icon
    * 
    * 🇫🇷 Obtenir l'icône d'indicateur de tri
    */
-  const getSortIcon = (key) => {
+  const getSortIcon = useCallback((key) => {
     if (sortConfig.key === key) {
       return sortConfig.direction === 'ascending' ? 
         <FaSortAmountUp className="ms-1" /> : 
         <FaSortAmountDown className="ms-1" />;
     }
     return <FaSort className="ms-1 text-muted" />;
-  };
+  }, [sortConfig]);
 
   /**
    * 🇬🇧 Apply filtering and sorting to plans
    * 
    * 🇫🇷 Appliquer le filtrage et le tri aux plans
    */
-  const getSortedPlans = () => {
+  const getSortedPlans = useMemo(() => {
     let filteredItems = plans.filter(plan => {
       const matchesSearch = plan.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || plan.plan_category === categoryFilter;
@@ -142,23 +139,25 @@ const UserPlansList = () => {
     }
     
     return filteredItems;
-  };
+  }, [plans, searchTerm, categoryFilter, sortConfig, planWorkouts]);
 
-  // Obtenir les plans filtrés et triés
-  const sortedFilteredPlans = getSortedPlans();
-  const pageCount = Math.ceil(sortedFilteredPlans.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentPlans = sortedFilteredPlans.slice(offset, offset + itemsPerPage);
+  // Pagination
+  const paginationData = useMemo(() => {
+    const pageCount = Math.ceil(getSortedPlans.length / itemsPerPage);
+    const offset = currentPage * itemsPerPage;
+    const currentPlans = getSortedPlans.slice(offset, offset + itemsPerPage);
+    return { pageCount, currentPlans };
+  }, [getSortedPlans, currentPage, itemsPerPage]);
 
   // Obtenir la couleur du badge selon la catégorie
-  const getCategoryBadgeColor = (category) => {
+  const getCategoryBadgeColor = useCallback((category) => {
     switch (category) {
       case 'Débutant': return 'success';
       case 'Intermédiaire': return 'warning';
       case 'Avancé': return 'danger';
       default: return 'secondary';
     }
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -236,7 +235,7 @@ const UserPlansList = () => {
         {/* Tableau des plans */}
         <div className="card shadow-sm mb-4">
           <div className="card-body p-0">
-            {currentPlans.length === 0 ? (
+            {paginationData.currentPlans.length === 0 ? (
               <div className="p-4 text-center">
                 <FaInfoCircle className="text-info mb-3 fs-1" />
                 <p className="text-muted">Aucun plan ne correspond à vos critères de recherche.</p>
@@ -279,7 +278,7 @@ const UserPlansList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentPlans.map((plan) => (
+                    {paginationData.currentPlans.map((plan) => (
                       <tr key={plan.id}>
                         <td>{plan.id}</td>
                         <td>
@@ -319,7 +318,7 @@ const UserPlansList = () => {
         </div>
 
         {/* Pagination */}
-        {sortedFilteredPlans.length > itemsPerPage && (
+        {getSortedPlans.length > itemsPerPage && (
           <div className="card mt-4">
             <div className="card-body d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center">
@@ -353,7 +352,7 @@ const UserPlansList = () => {
                     </button>
                   </li>
                   
-                  {[...Array(pageCount)].map((_, index) => (
+                  {[...Array(paginationData.pageCount)].map((_, index) => (
                     <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
                       <button
                         className="page-link"
@@ -364,11 +363,11 @@ const UserPlansList = () => {
                     </li>
                   ))}
                   
-                  <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                  <li className={`page-item ${currentPage === paginationData.pageCount - 1 ? 'disabled' : ''}`}>
                     <button 
                       className="page-link" 
                       onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === pageCount - 1}
+                      disabled={currentPage === paginationData.pageCount - 1}
                     >
                       &raquo;
                     </button>
@@ -383,4 +382,4 @@ const UserPlansList = () => {
   );
 };
 
-export default UserPlansList;
+export default React.memo(UserPlansList);

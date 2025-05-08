@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaPlus, 
@@ -35,7 +35,7 @@ const UserExercisesPage = () => {
   const exerciseLevels = ['Débutant', 'Intermédiaire', 'Avancé'];
 
   // Fetch exercises
-  const fetchExercises = async () => {
+  const fetchExercises = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getExercises();
@@ -72,28 +72,33 @@ const UserExercisesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [fetchExercises]);
 
-  // Filter exercises
-  const filteredExercises = exercises.filter(exercise => {
-    const matchesSearch = exercise.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (exercise.description && exercise.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = categoryFilter === 'all' || exercise.exercise_category === categoryFilter;
-    const matchesLevel = levelFilter === 'all' || exercise.exercise_level === levelFilter;
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
+  // Filter exercises - mémoïsé pour éviter des recalculs inutiles
+  const filteredExercises = useMemo(() => {
+    return exercises.filter(exercise => {
+      const matchesSearch = exercise.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (exercise.description && exercise.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = categoryFilter === 'all' || exercise.exercise_category === categoryFilter;
+      const matchesLevel = levelFilter === 'all' || exercise.exercise_level === levelFilter;
+      return matchesSearch && matchesCategory && matchesLevel;
+    });
+  }, [exercises, searchTerm, categoryFilter, levelFilter]);
 
-  // Pagination
-  const pageCount = Math.ceil(filteredExercises.length / itemsPerPage);
-  const offset = currentPage * itemsPerPage;
-  const currentExercises = filteredExercises.slice(offset, offset + itemsPerPage);
+  // Pagination - mémoïsé pour éviter des recalculs inutiles
+  const paginationData = useMemo(() => {
+    const pageCount = Math.ceil(filteredExercises.length / itemsPerPage);
+    const offset = currentPage * itemsPerPage;
+    const currentExercises = filteredExercises.slice(offset, offset + itemsPerPage);
+    return { pageCount, currentExercises };
+  }, [filteredExercises, currentPage, itemsPerPage]);
 
   // Delete handler
-  const handleDelete = async (id, title) => {
+  const handleDelete = useCallback(async (id, title) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'exercice "${title}" ?`)) {
       try {
         await deleteExercise(id);
@@ -102,33 +107,33 @@ const UserExercisesPage = () => {
         setError('Erreur lors de la suppression: ' + err.message);
       }
     }
-  };
+  }, [fetchExercises]);
 
   // Handle thumbnail error
-  const handleThumbnailError = (exerciseId) => {
+  const handleThumbnailError = useCallback((exerciseId) => {
     setThumbnailErrors(prev => ({
       ...prev,
       [exerciseId]: true
     }));
-  };
+  }, []);
 
   // Get level badge color
-  const getLevelBadgeColor = (level) => {
+  const getLevelBadgeColor = useCallback((level) => {
     switch (level) {
       case 'Débutant': return 'success';
       case 'Intermédiaire': return 'warning';
       case 'Avancé': return 'danger';
       default: return 'secondary';
     }
-  };
+  }, []);
 
   // Format description preview
-  const formatDescriptionPreview = (description, maxLength = 120) => {
+  const formatDescriptionPreview = useCallback((description, maxLength = 120) => {
     if (!description) return "Aucune description disponible";
     return description.length > maxLength 
       ? description.substring(0, maxLength) + '...'
       : description;
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -224,14 +229,14 @@ const UserExercisesPage = () => {
 
       {/* Exercises List */}
       <div className="row g-4">
-        {currentExercises.length === 0 ? (
+        {paginationData.currentExercises.length === 0 ? (
           <div className="col-12">
             <div className="alert alert-info" role="alert">
               Aucun exercice ne correspond à vos critères de recherche.
             </div>
           </div>
         ) : (
-          currentExercises.map((exercise) => (
+          paginationData.currentExercises.map((exercise) => (
             <div key={exercise.id} className="col-md-6 col-xl-4">
               <div className="card h-100 shadow-sm hover-lift">
                 <div className="card-header bg-white border-bottom-0">
@@ -335,7 +340,7 @@ const UserExercisesPage = () => {
                   </button>
                 </li>
                 
-                {[...Array(pageCount)].map((_, index) => (
+                {[...Array(paginationData.pageCount)].map((_, index) => (
                   <li key={index} className={`page-item ${currentPage === index ? 'active' : ''}`}>
                     <button
                       className="page-link"
@@ -346,11 +351,11 @@ const UserExercisesPage = () => {
                   </li>
                 ))}
                 
-                <li className={`page-item ${currentPage === pageCount - 1 ? 'disabled' : ''}`}>
+                <li className={`page-item ${currentPage === paginationData.pageCount - 1 ? 'disabled' : ''}`}>
                   <button 
                     className="page-link" 
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === pageCount - 1}
+                    disabled={currentPage === paginationData.pageCount - 1}
                   >
                     &raquo;
                   </button>

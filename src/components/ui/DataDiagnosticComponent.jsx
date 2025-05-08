@@ -1,6 +1,4 @@
-//composant de diagnostic complet pour vérifier la disponibilité des données:
-
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { FaBug, FaDatabase, FaCheckCircle, FaExclamationTriangle, FaSyncAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -14,15 +12,16 @@ const DataDiagnosticComponent = () => {
   const [expanded, setExpanded] = useState(false);
   const [showDataSample, setShowDataSample] = useState({});
   
-  const testEndpoints = async () => {
+  // Définition mémoïsée des endpoints pour éviter les recréations inutiles
+  const endpoints = useMemo(() => [
+    { name: 'Exercises', url: '/api/exercises' },
+    { name: 'Workouts', url: '/api/workouts' },
+    { name: 'Plans', url: '/api/plans' },
+    { name: 'Mes Listes', url: '/api/mylists' }
+  ], []);
+  
+  const testEndpoints = useCallback(async () => {
     setLoading(true);
-    const endpoints = [
-      { name: 'Exercises', url: '/api/exercises' },
-      { name: 'Workouts', url: '/api/workouts' },
-      { name: 'Plans', url: '/api/plans' },
-      { name: 'Mes Listes', url: '/api/mylists' }
-    ];
-    
     const newResults = {};
     
     for (const endpoint of endpoints) {
@@ -71,14 +70,30 @@ const DataDiagnosticComponent = () => {
     setResults(newResults);
     setLoading(false);
     setExpanded(true);
-  };
+  }, [endpoints]);
   
-  const toggleDataSample = (endpointName) => {
+  const toggleDataSample = useCallback((endpointName) => {
     setShowDataSample(prev => ({
       ...prev,
       [endpointName]: !prev[endpointName]
     }));
-  };
+  }, []);
+  
+  // Mémoisation des résultats formatés pour éviter des recalculs inutiles
+  const formattedResults = useMemo(() => {
+    return Object.keys(results).map(endpointName => {
+      const result = results[endpointName];
+      return {
+        name: endpointName,
+        success: result.success,
+        status: result.status,
+        count: result.count,
+        structure: result.structure.join(', '),
+        items: result.items.slice(0, 2), // Limiter à 2 éléments pour l'affichage
+        showSample: showDataSample[endpointName] || false
+      };
+    });
+  }, [results, showDataSample]);
   
   return (
     <div className="card my-4">
@@ -125,7 +140,7 @@ const DataDiagnosticComponent = () => {
             )}
           </button>
           
-          {Object.keys(results).length > 0 && (
+          {formattedResults.length > 0 && (
             <div className="table-responsive">
               <table className="table table-bordered">
                 <thead className="table-light">
@@ -138,67 +153,64 @@ const DataDiagnosticComponent = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(results).map(endpointName => {
-                    const result = results[endpointName];
-                    return (
-                      <React.Fragment key={endpointName}>
+                  {formattedResults.map((result, index) => (
+                    <React.Fragment key={index}>
+                      <tr>
+                        <td>
+                          <strong>{result.name}</strong>
+                        </td>
+                        <td>
+                          {result.success ? (
+                            <span className="text-success">
+                              <FaCheckCircle className="me-1" /> 
+                              {result.status}
+                            </span>
+                          ) : (
+                            <span className="text-danger">
+                              <FaExclamationTriangle className="me-1" /> 
+                              {result.status}
+                            </span>
+                          )}
+                        </td>
+                        <td>{result.count}</td>
+                        <td>
+                          <small className="text-muted">
+                            {result.structure}
+                          </small>
+                        </td>
+                        <td>
+                          {result.count > 0 && (
+                            <button 
+                              className="btn btn-sm btn-outline-secondary"
+                              onClick={() => toggleDataSample(result.name)}
+                            >
+                              {result.showSample ? (
+                                <>
+                                  <FaEyeSlash className="me-1" /> Cacher
+                                </>
+                              ) : (
+                                <>
+                                  <FaEye className="me-1" /> Voir
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                      {result.showSample && (
                         <tr>
-                          <td>
-                            <strong>{endpointName}</strong>
-                          </td>
-                          <td>
-                            {result.success ? (
-                              <span className="text-success">
-                                <FaCheckCircle className="me-1" /> 
-                                {result.status}
-                              </span>
-                            ) : (
-                              <span className="text-danger">
-                                <FaExclamationTriangle className="me-1" /> 
-                                {result.status}
-                              </span>
-                            )}
-                          </td>
-                          <td>{result.count}</td>
-                          <td>
-                            <small className="text-muted">
-                              {result.structure.join(', ')}
-                            </small>
-                          </td>
-                          <td>
-                            {result.count > 0 && (
-                              <button 
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => toggleDataSample(endpointName)}
-                              >
-                                {showDataSample[endpointName] ? (
-                                  <>
-                                    <FaEyeSlash className="me-1" /> Cacher
-                                  </>
-                                ) : (
-                                  <>
-                                    <FaEye className="me-1" /> Voir
-                                  </>
-                                )}
-                              </button>
-                            )}
+                          <td colSpan="5" className="bg-light">
+                            <div className="p-2">
+                              <h6>Échantillon de données:</h6>
+                              <pre className="mb-0" style={{ maxHeight: '200px', overflow: 'auto' }}>
+                                {JSON.stringify(result.items, null, 2)}
+                              </pre>
+                            </div>
                           </td>
                         </tr>
-                        {showDataSample[endpointName] && (
-                          <tr>
-                            <td colSpan="5" className="bg-light">
-                              <div className="p-2">
-                                <h6>Échantillon de données:</h6>
-                                <pre className="mb-0" style={{ maxHeight: '200px', overflow: 'auto' }}>
-                                  {JSON.stringify(result.items.slice(0, 2), null, 2)}
-                                </pre>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
+                      )}
+                    </React.Fragment>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -220,4 +232,4 @@ const DataDiagnosticComponent = () => {
   );
 };
 
-export default DataDiagnosticComponent;
+export default React.memo(DataDiagnosticComponent);
